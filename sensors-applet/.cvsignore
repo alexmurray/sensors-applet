@@ -1,0 +1,7 @@
+.deps
+Makefile
+Makefile.in
+config.h
+config.h.in
+sensors-applet
+stamp-h1

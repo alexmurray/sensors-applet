@@ -1,0 +1,410 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: GNOME Sensors Applet\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-12-23 11:51+1030\n"
+"PO-Revision-Date: 2006-11-26 12:17+0100\n"
+"Last-Translator: Peter Avramucz <muczy@freestart.hu>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../SensorsApplet.server.in.in.h:1
+msgid "Display temperature, fan speed and voltage sensor readings"
+msgstr "Hőmérséklet, ventillátor sebesség és feszültség mutatása"
+
+#: ../SensorsApplet.server.in.in.h:2
+msgid "Hardware Sensors Monitor"
+msgstr "Hardware Sensor Monitor"
+
+#: ../SensorsApplet.xml.h:1
+msgid "_About"
+msgstr "_Névjegy"
+
+#: ../SensorsApplet.xml.h:2
+msgid "_Help"
+msgstr "_Segítség"
+
+#: ../SensorsApplet.xml.h:3
+msgid "_Preferences"
+msgstr "_Beállítások"
+
+#: ../plugins/pmu-sys/pmu-sys-plugin.c:59
+#: ../plugins/i2c-sys/i2c-sys-plugin.c:53 ../plugins/i8k/i8k-plugin.c:48
+#: ../plugins/omnibook/omnibook-plugin.c:47
+#: ../plugins/i2c-proc/i2c-proc-plugin.c:57 ../plugins/acpi/acpi-plugin.c:54
+#: ../plugins/smu-sys/smu-sys-plugin.c:58
+msgid "CPU"
+msgstr "CPU"
+
+#: ../plugins/pmu-sys/pmu-sys-plugin.c:64 ../plugins/nvidia/nvidia-plugin.c:95
+#: ../plugins/smu-sys/smu-sys-plugin.c:63
+msgid "GPU"
+msgstr "Grafik CPU"
+
+#: ../plugins/pmu-sys/pmu-sys-plugin.c:69
+#: ../plugins/smu-sys/smu-sys-plugin.c:68
+msgid "FAN"
+msgstr "Lüfter"
+
+#: ../plugins/i8k/i8k-plugin.c:56
+msgid "FAN1"
+msgstr "Lüfter 1"
+
+#: ../plugins/i8k/i8k-plugin.c:64
+msgid "FAN2"
+msgstr "Lüfter 2"
+
+#: ../plugins/ibm-acpi/ibm-acpi-plugin.c:69
+msgid "MiniPCI"
+msgstr "MiniPCI"
+
+#: ../plugins/ibm-acpi/ibm-acpi-plugin.c:93
+#: ../plugins/ibm-acpi/ibm-acpi-plugin.c:104
+msgid "Battery"
+msgstr "Akkumulátor"
+
+#: ../plugins/ibm-acpi/ibm-acpi-plugin.c:121
+msgid "Fan"
+msgstr "Lüfter"
+
+#: ../plugins/sonypi/sonypi-plugin.c:62
+msgid "CPU TEMP"
+msgstr ""
+
+#: ../plugins/omnibook/omnibook-plugin.c:46
+#: ../sensors-applet/sensors-applet.c:422
+msgid "temperature"
+msgstr "hőmérséklet"
+
+#: ../plugins/nvidia/nvidia-plugin.c:107
+msgid "Ambient"
+msgstr ""
+
+#: ../sensors-applet/prefs-dialog.c:408
+msgid "Sensors Applet Preferences"
+msgstr "Szenzor Alkalmazás Beállítások"
+
+#: ../sensors-applet/prefs-dialog.c:443
+#: ../sensors-applet/sensors-applet.c:1427
+msgid "No sensors found!"
+msgstr "Nem találtam szenzorokat!"
+
+#: ../sensors-applet/prefs-dialog.c:449
+msgid "Display"
+msgstr "Kijelző"
+
+#: ../sensors-applet/prefs-dialog.c:461
+msgid "label with value"
+msgstr "címke értékkel"
+
+#: ../sensors-applet/prefs-dialog.c:462
+msgid "icon with value"
+msgstr "felirat értékkel"
+
+#: ../sensors-applet/prefs-dialog.c:463
+msgid "value only"
+msgstr "csak érték"
+
+#: ../sensors-applet/prefs-dialog.c:464
+msgid "icon only"
+msgstr "csak ikon"
+
+#: ../sensors-applet/prefs-dialog.c:465
+msgid "graph only"
+msgstr "csak grafikon"
+
+#: ../sensors-applet/prefs-dialog.c:481
+msgid "_Display sensors in panel as"
+msgstr "_Mutasd a panelen a szenzorokat így"
+
+#: ../sensors-applet/prefs-dialog.c:496
+msgid "beside labels / icons"
+msgstr "címkék / ikonok egymás mellett"
+
+#: ../sensors-applet/prefs-dialog.c:497
+msgid "below labels / icons"
+msgstr "címkék / ikonok egymás alatt"
+
+#: ../sensors-applet/prefs-dialog.c:508
+msgid "Preferred _position of sensor values"
+msgstr "Szenzorértékek _pozíciója"
+
+#: ../sensors-applet/prefs-dialog.c:520
+msgid "Kelvin"
+msgstr "Kelvin"
+
+#: ../sensors-applet/prefs-dialog.c:521
+msgid "Celsius"
+msgstr "Celsius fok"
+
+#: ../sensors-applet/prefs-dialog.c:522
+msgid "Fahrenheit"
+msgstr "Fahrenheit"
+
+#: ../sensors-applet/prefs-dialog.c:533
+msgid "_Temperature scale"
+msgstr "_Hőmérséklet skála"
+
+#: ../sensors-applet/prefs-dialog.c:564
+msgid "Graph _size (pixels)"
+msgstr "_Grafikun méret (Pixel)"
+
+#: ../sensors-applet/prefs-dialog.c:577
+msgid "Update"
+msgstr "Frissítés"
+
+#: ../sensors-applet/prefs-dialog.c:607
+msgid "Update _interval (secs)"
+msgstr "_Frissítési idő (sec)"
+
+#: ../sensors-applet/prefs-dialog.c:617
+msgid "Notifications"
+msgstr "Értesítés"
+
+#: ../sensors-applet/prefs-dialog.c:628
+msgid "Display _notifications"
+msgstr "Mutasson értesítéseket"
+
+#: ../sensors-applet/prefs-dialog.c:832
+msgid "Sensor"
+msgstr "Szenzor"
+
+#: ../sensors-applet/prefs-dialog.c:839
+msgid "Label"
+msgstr "Címke"
+
+#: ../sensors-applet/prefs-dialog.c:850 ../sensors-applet/prefs-dialog.c:855
+msgid "Labels can be edited directly by clicking on them."
+msgstr "A szerkesztéshez kattintson a címkére."
+
+#: ../sensors-applet/prefs-dialog.c:858
+msgid "Enabled"
+msgstr "Engedélyezve"
+
+#. icon stuff
+#: ../sensors-applet/prefs-dialog.c:864
+#: ../sensors-applet/sensor-config-dialog.c:450
+msgid "Icon"
+msgstr "Ikon"
+
+#: ../sensors-applet/prefs-dialog.c:998
+msgid "General Options"
+msgstr "Alap Beállítások"
+
+#: ../sensors-applet/prefs-dialog.c:1002
+msgid "Sensors"
+msgstr "Szenzorok"
+
+#: ../sensors-applet/sensors-applet.h:57
+msgid "RPM"
+msgstr ""
+
+#: ../sensors-applet/sensors-applet.h:58
+msgid "V"
+msgstr ""
+
+#: ../sensors-applet/sensors-applet.h:59
+msgid "A"
+msgstr ""
+
+#. hard code text as ERROR
+#: ../sensors-applet/active-sensor.c:637
+msgid "ERROR"
+msgstr ""
+
+#: ../sensors-applet/about-dialog.c:33
+msgid "Translator"
+msgstr "Fordító"
+
+#: ../sensors-applet/about-dialog.c:36
+msgid ""
+"To translator: Put your name here to show up in the About dialog as the "
+"translator"
+msgstr "Peter Avramucz <muczy@freestart.hu>"
+
+#: ../sensors-applet/sensor-config-dialog.c:392
+msgid "Sensor Properties"
+msgstr "Szenzor Tulajdonságok"
+
+#. graph stuff
+#: ../sensors-applet/sensor-config-dialog.c:417
+msgid "Graph"
+msgstr "Grafikon"
+
+#: ../sensors-applet/sensor-config-dialog.c:436
+msgid "Graph Color"
+msgstr "Grafikon Szín"
+
+#: ../sensors-applet/sensor-config-dialog.c:439
+msgid "Graph _color"
+msgstr "Grafikon _szín"
+
+#: ../sensors-applet/sensor-config-dialog.c:501
+msgid "Sensor _icon"
+msgstr "_Szenzor ikon"
+
+#: ../sensors-applet/sensor-config-dialog.c:507
+msgid "Scaling Parameters"
+msgstr "Skálázási Paraméterek"
+
+#: ../sensors-applet/sensor-config-dialog.c:540
+msgid "Sensor value _multiplier"
+msgstr "_Multiplikátor"
+
+#: ../sensors-applet/sensor-config-dialog.c:573
+msgid "Sensor value _offset"
+msgstr "_Indulóérték (Offset)"
+
+#. now do alarm widgets
+#: ../sensors-applet/sensor-config-dialog.c:583
+msgid "Sensor Limits"
+msgstr "Határérték"
+
+#: ../sensors-applet/sensor-config-dialog.c:616
+msgid "Sensor _low value"
+msgstr "M_inimum érték"
+
+#: ../sensors-applet/sensor-config-dialog.c:651
+msgid "Sensor _high value"
+msgstr "Ma_ximum érték"
+
+#: ../sensors-applet/sensor-config-dialog.c:662
+#: ../sensors-applet/sensors-applet.c:461
+msgid "Alarm"
+msgstr "Riasztás"
+
+#: ../sensors-applet/sensor-config-dialog.c:694
+msgid "Alarm _repeat interval (secs)"
+msgstr "_Riasztási időköz (sec)"
+
+#: ../sensors-applet/sensor-config-dialog.c:714
+#, fuzzy
+msgid "Lo_w alarm command"
+msgstr "_Riasztási parancs"
+
+#: ../sensors-applet/sensor-config-dialog.c:736
+#, fuzzy
+msgid "Hi_gh alarm command"
+msgstr "_Riasztási parancs"
+
+#: ../sensors-applet/sensor-config-dialog.c:750
+msgid "_Enable alarm"
+msgstr "_Engedélyezve"
+
+#: ../sensors-applet/sensors-applet.c:291
+#, fuzzy, c-format
+msgid "Error restoring saved sensor configuration."
+msgstr "Nem kompatibilis szenzor beállítást találtam"
+
+#: ../sensors-applet/sensors-applet.c:292
+#, c-format
+msgid ""
+"An error occurred while trying to restore the saved sensor configuration. "
+"The previous configuration has been lost and will need to be re-entered."
+msgstr ""
+
+#: ../sensors-applet/sensors-applet.c:296
+#, fuzzy, c-format
+msgid "Error saving sensor configuration."
+msgstr "Nem kompatibilis szenzor beállítást találtam"
+
+#: ../sensors-applet/sensors-applet.c:297
+#, fuzzy, c-format
+msgid ""
+"An error occurred while trying to save the current sensor configuration. "
+msgstr "Hiba történt az elmentett szenzorbeállítások betöltésekor"
+
+#: ../sensors-applet/sensors-applet.c:403
+msgid "is very low"
+msgstr "nagyon alacsony"
+
+#: ../sensors-applet/sensors-applet.c:404
+msgid "lower limit"
+msgstr "alsó határ"
+
+#. assume high alarm condition
+#: ../sensors-applet/sensors-applet.c:409
+msgid "is very high"
+msgstr "nagyon magas"
+
+#: ../sensors-applet/sensors-applet.c:410
+msgid "upper limit"
+msgstr "felső határ"
+
+#: ../sensors-applet/sensors-applet.c:421
+msgid "Temperature"
+msgstr "Hőmérséklet"
+
+#: ../sensors-applet/sensors-applet.c:443
+msgid "Voltage"
+msgstr "Feszültség"
+
+#: ../sensors-applet/sensors-applet.c:444
+msgid "voltage"
+msgstr "feszültség"
+
+#: ../sensors-applet/sensors-applet.c:448
+msgid "Fan Speed"
+msgstr "Ventillátor sebesség"
+
+#: ../sensors-applet/sensors-applet.c:449
+msgid "fan speed"
+msgstr "ventillátor sebesség"
+
+#: ../sensors-applet/sensors-applet.c:453
+msgid "Current"
+msgstr "Jelenlegi"
+
+#: ../sensors-applet/sensors-applet.c:454
+msgid "current"
+msgstr "jelenlegi"
+
+#: ../sensors-applet/sensors-applet.c:467
+#, c-format
+msgid "Error updating sensor %s"
+msgstr ""
+
+#: ../sensors-applet/sensors-applet.c:468
+#, fuzzy, c-format
+msgid ""
+"An error occurred while trying to update the value of the sensor %s located "
+"at %s."
+msgstr "Hiba történt az elmentett szenzorbeállítások betöltésekor"
+
+#: ../sensors-applet/sensors-applet.c:576
+msgid "No sensors enabled!"
+msgstr "Nincs engedélyezett szenzor!"
+
+#: ../sensors-applet/sensors-applet-gconf.c:41
+msgid "An error occurred loading the stored sensors data"
+msgstr "Hiba történt az elmentett szenzorbeállítások betöltésekor"
+
+#: ../sensors-applet/sensors-applet-gconf.c:42
+msgid "Incompatible sensors configuration found"
+msgstr "Nem kompatibilis szenzor beállítást találtam"
+
+#: ../sensors-applet/sensors-applet-gconf.c:46
+msgid ""
+"An error has occurred when loading the stored sensors data. The default "
+"values will be used to recover from this error."
+msgstr ""
+"Hiba történt az elmentett szenzorbeállítások betöltésekor. Az "
+"alapértelmezett értékek lesznek betöltve."
+
+#: ../sensors-applet/sensors-applet-gconf.c:49
+msgid ""
+"Unfortunately the previous configuration for GNOME Sensors Applet is not "
+"compatible with this version. The existing sensors data will be overwritten "
+"with the default values for this new version."
+msgstr ""
+"Sajnos az előző GNOME Sensors Applet verzió beállításai nem kompatibilisek "
+"ezzel a verzióéval. A jelenlegi beállítások felül lesznek írva az új verzió "
+"alapértelmezett értékeivel."
