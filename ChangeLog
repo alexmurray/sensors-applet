@@ -1,3 +1,10 @@
+2009-03-05  Alex Murray  <murray.alex@gmail.com>
+
+	* Fix bug where choosing to display icons would fail if we start with a
+	different display mode
+
+	* Add support to nvidia plugin for multiple GPUs (Fixes bug #2659148)
+
 2008-03-16  Alex Murray  <murray.alex@gmail.com>
 
 	* Fixed bugs in libsensors and nvidia plugins, where we would
