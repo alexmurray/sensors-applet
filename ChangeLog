@@ -1,5 +1,7 @@
 2009-03-05  Alex Murray  <murray.alex@gmail.com>
 
+	* Add plugin for fan sensor on eeepc
+
 	* Fix bug where choosing to display icons would fail if we start with a
 	different display mode
 
