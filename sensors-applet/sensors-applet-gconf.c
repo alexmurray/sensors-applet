@@ -28,7 +28,6 @@
 
 static const gchar * const compatible_versions[] = {
         PACKAGE_VERSION, /* always list current version */
-        "2.2.0"
 };
 
 #define NUM_COMPATIBLE_VERSIONS G_N_ELEMENTS(compatible_versions)
