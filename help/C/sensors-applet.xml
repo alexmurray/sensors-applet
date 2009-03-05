@@ -7,7 +7,7 @@
   <!ENTITY date "January 2006">
   <!ENTITY applet "GNOME Sensors Applet">
   <!ENTITY author-name "Alex Murray">
-  <!ENTITY author-email "pragmatine@gmail.com">
+  <!ENTITY author-email "murray.alex@gmail.com">
   <!ENTITY project-webpage "http://sensors-applet.sourceforge.net/">
   <!-- Information about the entities.
        The legal.xml file contains legal information, there is no need to edit the file. 
@@ -693,7 +693,7 @@ Alarms for individual sensors must also be enabled.
     <title>About &applet;</title>
     <para>
       <application>&applet;</application> was written by Alex Murray
-      (<email>pragmatine@gmail.com</email>). To find more information about
+      (<email>murray.alex@gmail.com</email>). To find more information about
       <application>&applet;</application>, please visit the <ulink
         url="&project-webpage;" type="http">&applet; Project
         Homepage</ulink>. 
