@@ -1,5 +1,6 @@
 DIST_SUBDIRS = \
 	acpi \
+	eee \
 	hddtemp \
         i2c-proc \
         i2c-sys \
@@ -13,6 +14,7 @@ DIST_SUBDIRS = \
 	sonypi
 SUBDIRS = \
 	acpi \
+	eee \
 	hddtemp \
 	i8k \
 	ibm-acpi \

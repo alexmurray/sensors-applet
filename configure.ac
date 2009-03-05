@@ -213,6 +213,7 @@ AC_CONFIG_FILES([
 	lib/Makefile
 	plugins/Makefile
 	plugins/acpi/Makefile
+	plugins/eee/Makefile
 	plugins/hddtemp/Makefile
 	plugins/i2c-proc/Makefile
 	plugins/i2c-sys/Makefile
