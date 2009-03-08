@@ -1,3 +1,9 @@
+2009-03-08  Alex Murray  <murray.alex@gmail.com>
+
+	* Avoid using sensors_parse_chip_name in libsensors plugin each time we
+	need to get a sensor's value since it leaks memory. (Fixes bug
+	#2555807)
+
 2009-03-05  Alex Murray  <murray.alex@gmail.com>
 
 	* Add plugin for fan sensor on eeepc
