@@ -10,6 +10,7 @@ plugins/nvidia/nvidia-plugin.c
 plugins/i2c-proc/i2c-proc-plugin.c
 plugins/acpi/acpi-plugin.c
 plugins/smu-sys/smu-sys-plugin.c
+plugins/eee/eee-plugin.c
 sensors-applet/prefs-dialog.c
 sensors-applet/sensors-applet.h
 sensors-applet/active-sensor.c
