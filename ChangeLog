@@ -1,5 +1,7 @@
 2009-03-08  Alex Murray  <murray.alex@gmail.com>
 
+	* GNOME Sensors Applet Version 2.2.2 Released
+	
 	* Avoid using sensors_parse_chip_name in libsensors plugin each time we
 	need to get a sensor's value since it leaks memory. (Fixes bug
 	#2555807)
