@@ -30,6 +30,7 @@ AC_PROG_INTLTOOL
 AC_SUBST(CFLAGS)
 AC_SUBST(CPPFLAGS)
 AC_SUBST(LDFLAGS)
+AC_SUBST(LIBS)
 
 # ============== look for dependencies =============== #
 # check for headers needed for standard interfaces
@@ -108,7 +109,7 @@ AC_ARG_WITH(libsensors,
         if test "$withval" != "no" -a "$withval" != "yes"; then
                 SENSORS_DIR=$withval
                 CPPFLAGS="${CPPFLAGS} -I${SENSORS_DIR}/include/sensors"
-                LDFLAGS="${LDFLAGS} -L${SENSORS_DIR}/lib"
+                LIBS="${LIBS} -L${SENSORS_DIR}/lib"
         fi
 	with_libsensors=$withval],[
 	with_libsensors="yes"
@@ -146,7 +147,7 @@ AC_ARG_WITH(nvidia,
         if test "$withval" != "no" -a "$withval" != "yes"; then
                 NVIDIA_DIR=$withval
                 CFLAGS="${CFLAGS} -I${NVIDIA_DIR}/include"
-                LDFLAGS="${LDFLAGS} -L${NVIDIA_DIR}/lib"
+                LIBS="${LIBS} -L${NVIDIA_DIR}/lib"
         fi
 	with_nvidia=$withval],[
 	with_nvidia="yes"
@@ -160,7 +161,7 @@ else
         	if test "$withval" != "no" -a "$withval" != "yes"; then
                    	X11_DIR=$withval
 		   	CFLAGS="${CFLAGS} -I${X11_DIR}/include"
- 			LDFLAGS="${LDFLAGS} -L${X11_DIR}/lib"
+			LIBS="${LIBS} -L${X11_DIR}/lib"
         	fi
 		with_x11=$withval],[
 		with_x11="yes"
@@ -170,7 +171,7 @@ else
                 AC_CHECK_LIB(X11, XOpenDisplay, [ HAVE_X11=true ]))
 	# can't embed next AC_CHECK_HEADERS in true case of AC_CHECK_LIB
 	if test "${HAVE_X11}" = "true"; then
-	        LDFLAGS="${LDFLAGS} -lX11 -lXext"
+	        LIBS="${LIBS} -lX11 -lXext"
 		# need to specifically include X11/Xlib header when
 		# doing checks for NVCtrl headers
 	        AC_CHECK_HEADERS(NVCtrl/NVCtrl.h NVCtrl/NVCtrlLib.h, [ HAVE_NVIDIA=true ], [], 
