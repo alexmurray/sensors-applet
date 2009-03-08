@@ -44,6 +44,8 @@
 
 const gchar *plugin_name = "libsensors";
 
+GHashTable *hash_table = NULL;
+
 enum {
 	LIBSENSORS_CHIP_PARSE_ERROR,
 	LIBSENSORS_MISSING_FEATURE_ERROR,
@@ -56,7 +58,7 @@ enum {
 #define LIBSENSORS_ALTERNATIVE_CONFIG_FILE "/usr/local/etc/sensors.conf"
 #endif
 
-static regex_t uri_re;
+regex_t uri_re;
 
 static char *get_chip_name_string(const sensors_chip_name *chip) {
 	char *name;
@@ -372,7 +374,7 @@ static GList *libsensors_plugin_get_sensors(void) {
 			if (!input_feature)
                         {
                                 g_debug("%s: %d: could not get input subfeature for: %s\n",
-                                        __FILE__, __LINE__, chip_name);
+                                        __FILE__, __LINE__, chip_name_string);
 				continue;
                         }
                         // if still here we got input feature so get label
@@ -413,6 +415,7 @@ static GList *libsensors_plugin_get_sensors(void) {
                                   (type == VOLTAGE_SENSOR ? "voltage" : "error"))), label, value);
 
                         path = g_strdup_printf ("sensor://%s/%d", chip_name_string, input_feature->number);
+			g_hash_table_insert(hash_table, g_strdup(path), (void *)chip_name);
                         sensors_applet_plugin_add_sensor_with_limits(&sensors,
                                                                      path,
                                                                      label,
@@ -434,80 +437,61 @@ static GList *libsensors_plugin_get_sensors(void) {
 }
 
 static gdouble libsensors_plugin_get_sensor_value(const gchar *path, 
-                                                             const gchar *id, 
-                                                             SensorType type,
-                                                             GError **error) {
+						  const gchar *id, 
+						  SensorType type,
+						  GError **error) {
 	gdouble result = 0;
 	regmatch_t m[3];
 
 	/* parse the uri into a (chip, feature) tuplet */
 	if (regexec (&uri_re, path, 3, m, 0) == 0) {
-		char *desired_chip_s;
-		sensors_chip_name desired_chip;
-		int feature;
-
-		int i;
 		const sensors_chip_name *found_chip;
+		int feature;
+		int i;
 
-		desired_chip_s = g_strndup (path + m[1].rm_so, m[1].rm_eo - m[1].rm_so);
-		if (sensors_parse_chip_name (desired_chip_s, &desired_chip) != 0)
-                {
-			g_set_error (error, SENSORS_APPLET_PLUGIN_ERROR, LIBSENSORS_CHIP_PARSE_ERROR, "Error parsing chip name");
-                } else {
+		if ((found_chip = g_hash_table_lookup(hash_table,
+						     path)) != NULL)
+		{
+			gdouble value;
 			feature = atoi(path + m[2].rm_so);
 #if SENSORS_API_VERSION < 0x400
-                        /* search for the correct chip */
-			for (i = 0; (found_chip = sensors_get_detected_chips (&i)); ) {
-				if (sensors_match_chip (desired_chip, *found_chip)) {
-                                        double value;
-					/* retrieve the value of the feature */
-					if (sensors_get_feature (*found_chip, feature, &value) == 0) {
-						result = value;
-                                        } else {
-						g_set_error (error, SENSORS_APPLET_PLUGIN_ERROR, LIBSENSORS_MISSING_FEATURE_ERROR, "Error retrieving sensor value");
-                                        }
-                                        break;
-                                }
-                        }
-                        // work around mem-leak in libsensors3
-                        if (desired_chip.bus == SENSORS_CHIP_NAME_BUS_DUMMY)
-                        {
-                                g_assert(desired_chip.busname != NULL);
-                                free(desired_chip.busname);
-                        }
-                        free(desired_chip.prefix);
-
+			/* retrieve the value of the feature */
+			if (sensors_get_feature (*found_chip, feature, &value) == 0) {
+				result = value;
+			} else {
+				g_set_error (error, SENSORS_APPLET_PLUGIN_ERROR, LIBSENSORS_MISSING_FEATURE_ERROR, "Error retrieving sensor value");
+			}
 #else
-                        i = 0;
-                        if (found_chip = sensors_get_detected_chips(&desired_chip, &i)) {
-                                gdouble value;
-                                
-                                if (sensors_get_value(found_chip, feature, &value) >= 0) {
-                                        result = value;
-                                } else {
-                                        g_set_error (error, SENSORS_APPLET_PLUGIN_ERROR, LIBSENSORS_MISSING_FEATURE_ERROR, "Error retrieving sensor value");
-                                }
+			if (sensors_get_value(found_chip, feature, &value) >= 0) {
+				result = value;
+			} else {
+				g_set_error (error, SENSORS_APPLET_PLUGIN_ERROR, LIBSENSORS_MISSING_FEATURE_ERROR, "Error retrieving sensor value");
 			}
 #endif
-			if (found_chip == NULL)
-				g_set_error (error, SENSORS_APPLET_PLUGIN_ERROR, LIBSENSORS_CHIP_NOT_FOUND_ERROR, "Chip not found");
+		} else {
+			g_set_error (error, SENSORS_APPLET_PLUGIN_ERROR, LIBSENSORS_CHIP_NOT_FOUND_ERROR, "Chip not found");
 		}
-		g_free (desired_chip_s);
-	} else
+	} else {
 		g_set_error (error, SENSORS_APPLET_PLUGIN_ERROR, LIBSENSORS_REGEX_URL_COMPILE_ERROR, "Error compiling URL regex");
+	}
 	return result;
-        
 }
 
 
 static GList *libsensors_plugin_init() {
 	/* compile the regular expressions */
 	if (regcomp(&uri_re, "^sensor://([a-z0-9-]+)/([0-9]+)$", 
-                    REG_EXTENDED | REG_ICASE) != 0) {
-                g_debug("Error compiling regexp...not initing libsensors sensors interface");
-                return NULL;
-        }
-        
+		    REG_EXTENDED | REG_ICASE) != 0) {
+		g_debug("Error compiling regexp...not initing libsensors sensors interface");
+		return NULL;
+	}
+
+	/* create hash table to associate path strings with sensors_chip_name
+	 * pointers - make sure it free's the keys strings on destroy */
+	hash_table = g_hash_table_new_full(g_str_hash,
+					   g_str_equal,
+					   g_free,
+					   NULL);
 	return libsensors_plugin_get_sensors();
 }
 
