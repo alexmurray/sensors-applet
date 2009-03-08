@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 Alex Murray <murray.alex@gmail.com>
+ * Copyright (C) 2005-2009 Alex Murray <murray.alex@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ void about_dialog_open(SensorsApplet *sensors_applet) {
 	gtk_show_about_dialog(NULL,
 			      "program-name", PACKAGE_NAME, 
 			      "version", PACKAGE_VERSION,
-			      "copyright", "(C) 2005-2008, Alex Murray <murray.alex@gmail.com>",
+			      "copyright", "(C) 2005-2009, Alex Murray <murray.alex@gmail.com>",
 			      "authors", authors,
 			      "documenters", authors,
 			      "translator-credits", translator,
