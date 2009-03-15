@@ -225,6 +225,7 @@ static void check_sensor_with_data(GList **sensors,
                                         
                         }
 
+                        g_hash_table_insert(hash_table, g_strdup(url), (void *)chip_name);
                         // the id identifies a particular sensor for the user;
                         // we default to the label returned by libsensors
                         sensors_applet_plugin_add_sensor_with_limits(sensors,
