@@ -2,7 +2,7 @@
 
 # if doing version bump - make sure you update sensors-applet-gconf
 # version checking to add old version if no changes to config
-AC_INIT([GNOME Sensors Applet], [2.2.2], [murray.alex@gmail.com], 
+AC_INIT([GNOME Sensors Applet], [2.2.3], [murray.alex@gmail.com], 
 [sensors-applet])
 
 AC_CONFIG_SRCDIR([sensors-applet/main.c])
