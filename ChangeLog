@@ -1,3 +1,10 @@
+2009-03-15  Alex Murray  <murray.alex@gmail.com>
+
+	* GNOME Sensors Applet Version 2.2.3 Released
+
+	* Fix error retrieving sensor value if compiled against old libsensors
+	library version (libsensors API version < 4) (Fixes bug #2687451).
+
 2009-03-08  Alex Murray  <murray.alex@gmail.com>
 
 	* GNOME Sensors Applet Version 2.2.2 Released
