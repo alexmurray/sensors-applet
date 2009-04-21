@@ -28,6 +28,7 @@
 
 static const gchar * const compatible_versions[] = {
         PACKAGE_VERSION, /* always list current version */
+        "2.2.3",
 	"2.2.2",
 };
 
@@ -48,8 +49,8 @@ static const gchar * const error_messages[] = {
            "The default values will be used to recover from this error."),
         
         N_("Unfortunately the previous configuration for GNOME Sensors Applet "
-          "is not compatible with this version. The existing sensors data "
-          "will be overwritten with the default values for this new version.")
+           "is not compatible with this version. The existing sensors data "
+           "will be overwritten with the default values for this new version.")
 };
 
 /* function to be called if an error occurs
@@ -69,7 +70,7 @@ static void sensors_applet_gconf_error_occurred(SensorsAppletGConfError error) {
 
         g_free(markup);
 
-         /* runs dialog as modal and doesn't return until user clicks
+        /* runs dialog as modal and doesn't return until user clicks
          * button */
         gtk_dialog_run(GTK_DIALOG(dialog));
         gtk_widget_destroy(GTK_WIDGET(dialog));
@@ -476,7 +477,7 @@ gboolean sensors_applet_gconf_save_sensors(SensorsApplet *sensors_applet) {
         }
 
 	sensors_applet_gconf_free_lists(lists,
-                                      NUM_KEYS);
+                                        NUM_KEYS);
 
         /* store current version to identify config data */
         panel_applet_gconf_set_string(sensors_applet->applet,

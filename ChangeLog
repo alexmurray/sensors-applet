@@ -1,5 +1,7 @@
 2009-04-21  Alex Murray  <murray.alex@gmail.com>
 
+	* GNOME Sensors Applet Version 2.2.4 Released
+
 	* Fix bug where changing temperature scale would convert limits of
 	non-temperature sensors (Fixes Ubuntu bug #249955)
 
