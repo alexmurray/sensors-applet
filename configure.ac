@@ -191,6 +191,33 @@ AM_CONDITIONAL(NVIDIA, test -n "$NVIDIA_LIBS")
 AC_SUBST(NVIDIA_CFLAGS)
 AC_SUBST(NVIDIA_LIBS)
 
+AC_ARG_WITH(aticonfig, [  
+         --with-aticonfig[=PATH]   use aticonfig provided by PATH], [
+	if test "$withval" != "no" -a "$withval" != "yes"; then
+		aticonfig_exe=$withval
+        else
+		aticonfig_exe=aticonfig
+        fi
+        with_aticonfig=$withval ], [
+	aticonfig_exe=aticonfig
+	with_aticonfig="check"
+])
+
+if test "x$with_aticonfig" == "xcheck"; then
+	AC_CHECK_PROG(ATICONFIG_EXE, ["$aticonfig_exe"], yes, no)
+        if test "x$ATICONFIG_EXE" = "xno"; then
+		with_aticonfig="no"
+        fi
+fi
+
+AM_CONDITIONAL(ATICONFIG, test "$with_aticonfig" != "no")
+if test "$with_aticonfig" = "no"; then
+  echo "Disabling aticonfig support"
+else
+  AC_DEFINE(HAVE_ATICONFIG,1,[using aticonfig])
+  AC_DEFINE_UNQUOTED(ATICONFIG_EXE, ["$aticonfig_exe"], [aticonfig executable])
+fi
+
 AC_SUBST(CFLAGS)
 # for help docs stuff
 AC_PATH_PROG(XSLTPROC, xsltproc, no)
@@ -222,6 +249,7 @@ AC_CONFIG_FILES([
 	plugins/ibm-acpi/Makefile
 	plugins/libsensors/Makefile
 	plugins/nvidia/Makefile
+	plugins/aticonfig/Makefile
 	plugins/omnibook/Makefile
 	plugins/pmu-sys/Makefile
 	plugins/smu-sys/Makefile

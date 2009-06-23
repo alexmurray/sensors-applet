@@ -11,7 +11,9 @@ DIST_SUBDIRS = \
 	omnibook \
 	pmu-sys \
 	smu-sys \
-	sonypi
+	sonypi \
+	aticonfig
+
 SUBDIRS = \
 	acpi \
 	eee \
@@ -32,4 +34,8 @@ endif
 
 if NVIDIA
 SUBDIRS      += nvidia
+endif
+
+if ATICONFIG
+SUBDIRS      += aticonfig
 endif
