@@ -24,6 +24,8 @@
 #include <stdio.h>
 #endif /* HAVE_STDIO_H */
 
+#include <glib.h>
+#include <glib/gi18n.h>
 #include "eee-plugin.h"
 
 const gchar *plugin_name = "eee";
