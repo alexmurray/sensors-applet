@@ -44,9 +44,9 @@ static void load_all_plugins(SensorsApplet *sensors_applet,
                                 SensorsAppletPluginName name_fn;
                                 SensorsAppletPluginInit init_fn;
                                 SensorsAppletPluginGetSensorValue get_value_fn;
-                                
-                                
+
                                 plugin_file = g_strdup_printf("%s/%s", path, file);
+				g_debug("found %s in plugin directory", plugin_file);
                                 if ((handle = dlopen(plugin_file, RTLD_NOW)) != NULL) {
                                         
                                         if ((name_fn = dlsym(handle, "sensors_applet_plugin_name")) != NULL &&
@@ -103,7 +103,9 @@ static void load_all_plugins(SensorsApplet *sensors_applet,
                                                         g_debug("error closing plugin file %s", plugin_file);
                                                 }
                                         }
-                                }
+				} else {
+                                        g_debug("Could not dlopen: %s: %s", plugin_file, dlerror());
+				}
                                 g_free(plugin_file);
                         }
                         g_dir_close(dir);
