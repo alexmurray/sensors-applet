@@ -55,6 +55,8 @@ LIBGNOME_REQUIRED=2.8.0
 LIBGNOMEUI_REQUIRED=2.8.0
 LIBNOTIFY_REQUIRED=0.3.0
 LIBCAIRO_REQUIRED=1.0.4
+LIBDEVKIT_REQUIRED=003
+LIBDBUSGLIB_REQUIRED=0.80
 
 PKG_CHECK_MODULES(GLIB, glib-2.0 >= $GLIB_REQUIRED)
 AC_SUBST(GLIB_CFLAGS)
@@ -73,6 +75,26 @@ AC_SUBST(GNOME_LIBS)
 PKG_CHECK_MODULES(CAIRO, cairo >= $LIBCAIRO_REQUIRED)
 AC_SUBST(CAIRO_CFLAGS)
 AC_SUBST(CAIRO_LIBS)
+
+# Checking whether we want DeviceKit support turned on.
+# Default is off since DeviceKit still hasn't been adopted widely enough yet.
+AC_ARG_ENABLE(devicekit,
+		AS_HELP_STRING([--enable-devicekit],
+				[Support DeviceKit (Disks for now) sensor readings.]),
+		enable_devkit=$enableval,enable_devkit=no)
+
+if test x$enable_devkit = xno ; then
+	echo "Disabling DeviceKit support"
+else
+	PKG_CHECK_MODULES(DEVICEKIT, devkit-gobject >= $LIBDEVKIT_REQUIRED
+				dbus-glib-1 >= $LIBDBUSGLIB_REQUIRED,
+				HAVE_DEVICEKIT="yes", HAVE_DEVICEKIT="no")
+	AC_SUBST(DEVICEKIT_CFLAGS)
+	AC_SUBST(DEVICEKIT_LIBS)
+
+fi
+
+AM_CONDITIONAL(DEVKIT_DISKS, test -n "$DEVICEKIT_CFLAGS")
 
 # support for libnotify
 LIBNOTIFY_CFLAGS=
@@ -214,6 +236,7 @@ AC_CONFIG_FILES([
 	lib/Makefile
 	plugins/Makefile
 	plugins/acpi/Makefile
+	plugins/devkit-disks/Makefile
 	plugins/eee/Makefile
 	plugins/hddtemp/Makefile
 	plugins/i2c-proc/Makefile
