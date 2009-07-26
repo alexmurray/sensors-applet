@@ -79,7 +79,7 @@ AC_SUBST(CAIRO_LIBS)
 # enable support for devicekit-disks by default if its available
 AC_ARG_ENABLE(devicekit,
 		AS_HELP_STRING([--enable-devicekit],
-				[Support DeviceKit (Disks for now) sensor readings.]),
+				[Support DeviceKit sensor readings.]),
 		enable_devkit=$enableval,enable_devkit="yes")
 
 if test "x$enable_devkit" = "xno" ; then
