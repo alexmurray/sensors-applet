@@ -21,17 +21,4 @@
 
 #include <sensors-applet/sensors-applet-plugin.h>
 
-/* This structure contains the data on the sensors in the following order:-
- * 1) The object path of the device.
- * 2) The status of the device, whether a property has changed or not. 
- * 3) The temperature reading as of the last poll to DeviceKit. 
- * 4) The next structure. 
- */
-typedef struct _Dev_Info{
-  const gchar *dev_path;
-  gboolean dev_changed;
-  gdouble old_temp;
-  struct _Dev_Info *next;
-} Dev_Info;
-
 #endif /* DEVKIT_PLUGIN_H */
