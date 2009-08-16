@@ -22,7 +22,7 @@ AH_TEMPLATE([GETTEXT_PACKAGE], [Package name for gettext])
 GETTEXT_PACKAGE=sensors-applet
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE")
 AC_SUBST(GETTEXT_PACKAGE)
-ALL_LINGUAS="cs de es fi fr hu it pl pt_BR ro ru sv"
+ALL_LINGUAS="cs de es fi fr hu it pl pt_BR ro ru sv zh_CN"
 AM_GLIB_GNU_GETTEXT
 AC_PROG_INTLTOOL
 
