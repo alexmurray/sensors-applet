@@ -481,8 +481,8 @@ static gdouble libsensors_plugin_get_sensor_value(const gchar *path,
 
 static GList *libsensors_plugin_init() {
 	/* compile the regular expressions */
-	if (regcomp(&uri_re, "^sensor://([a-z0-9-]+)/([0-9]+)$", 
-		    REG_EXTENDED | REG_ICASE) != 0) {
+	if (regcomp(&uri_re, "^sensor://([a-z0-9_-]+)/([0-9]+)$",
+                    REG_EXTENDED | REG_ICASE) != 0) {
 		g_debug("Error compiling regexp...not initing libsensors sensors interface");
 		return NULL;
 	}
