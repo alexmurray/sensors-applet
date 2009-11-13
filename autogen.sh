@@ -13,7 +13,8 @@ PKG_NAME="sensors-applet"
 }
 
 which gnome-autogen.sh || {
-	echo "You need to install gnome-common from the GNOME CVS"
+	echo -n "ERROR: gnome-autogen.sh not found in path: "
+	echo "Please install gnome-common before running this script"
 	exit 1
 }
 
