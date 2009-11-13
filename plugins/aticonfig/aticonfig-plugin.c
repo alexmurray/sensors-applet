@@ -42,11 +42,10 @@ const gchar *plugin_name = "aticonfig";
 #define MAX_GPUS 4
 #define SENSOR_ID_PREFIX "ATIGPU"
 
-typedef gdouble gdouble_array[];
 static gdouble gpu_temps[MAX_GPUS];
 static int num_gpus = 0;
 
-static int ati_get_temps(gdouble_array* temps, int max_temps)
+static int ati_get_temps(gdouble temps[], int max_temps)
 {
   double temp;
   int read_count;
@@ -62,7 +61,7 @@ static int ati_get_temps(gdouble_array* temps, int max_temps)
       getc(aticonfig);
     } 
     else {
-      (*temps)[gpu_no] = (gdouble)temp;
+      temps[gpu_no] = (gdouble)temp;
       if (++gpu_no >= max_temps) 
 	break;
     }
