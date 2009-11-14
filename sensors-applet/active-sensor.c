@@ -158,26 +158,14 @@ static void active_sensor_alarm_on(ActiveSensor *active_sensor,
                                        active_sensor->alarm_timeout);
                         switch (notif_type) {
                         case LOW_ALARM:
-#if GLIB_CHECK_VERSION(2,14,0)
                                 active_sensor->alarm_timeout_id[notif_type] = g_timeout_add_seconds(timeout,
                                                                                                     (GSourceFunc)active_sensor_execute_low_alarm,
                                                                                                     active_sensor);
-#else
-                                active_sensor->alarm_timeout_id[notif_type] = g_timeout_add(timeout*1000,
-                                                                                            (GSourceFunc)active_sensor_execute_low_alarm,
-                                                                                            active_sensor);
-#endif
                                 break;
                         case HIGH_ALARM:
-#if GLIB_CHECK_VERSION(2,14,0)
                                 active_sensor->alarm_timeout_id[notif_type] = g_timeout_add_seconds(timeout,
                                                                                                     (GSourceFunc)active_sensor_execute_high_alarm,
                                                                                                     active_sensor);
-#else
-                                active_sensor->alarm_timeout_id[notif_type] = g_timeout_add(timeout * 1000,
-                                                                                            (GSourceFunc)active_sensor_execute_high_alarm,
-                                                                                            active_sensor);
-#endif
                                 break;
                         default:
                                 g_debug("Unkown notif type: %d", notif_type);
@@ -366,11 +354,6 @@ void active_sensor_destroy(ActiveSensor *active_sensor) {
         g_debug("-- destroying active sensor value...");
         gtk_object_destroy(GTK_OBJECT(active_sensor->value));
 
-#if !GTK_CHECK_VERSION(2,12,0)
-        gtk_object_destroy(GTK_OBJECT(active_sensor->label_event_box));
-        gtk_object_destroy(GTK_OBJECT(active_sensor->icon_event_box));
-        gtk_object_destroy(GTK_OBJECT(active_sensor->value_event_box));
-#endif
         g_debug("-- destroying active sensor graph and frame...");
         gtk_object_destroy(GTK_OBJECT(active_sensor->graph));
         gtk_object_destroy(GTK_OBJECT(active_sensor->graph_frame));
@@ -487,48 +470,6 @@ ActiveSensor *active_sensor_new(SensorsApplet *sensors_applet,
                                            (horizontal ? graph_size : sensors_applet->size),
                                            (horizontal ? sensors_applet->size : graph_size));
 
-#if !GTK_CHECK_VERSION(2,12,0)
-        active_sensor->label_event_box = gtk_event_box_new();
-        /* make invisible so can still have transparent background
-         * etc on applet itself and make above so event box gets all events
-         */
-        gtk_event_box_set_visible_window(GTK_EVENT_BOX(active_sensor->label_event_box),
-                                         FALSE);
-        gtk_event_box_set_above_child(GTK_EVENT_BOX(active_sensor->label_event_box),
-                                         TRUE);
-
-
-        gtk_container_add(GTK_CONTAINER(active_sensor->label_event_box),
-                          active_sensor->label);
-
-        active_sensor->value_event_box = gtk_event_box_new();
-        gtk_event_box_set_visible_window(GTK_EVENT_BOX(active_sensor->value_event_box),
-                                         FALSE);
-        gtk_event_box_set_above_child(GTK_EVENT_BOX(active_sensor->value_event_box),
-                                         TRUE);
-
-        gtk_container_add(GTK_CONTAINER(active_sensor->value_event_box),
-                          active_sensor->value);
-        
-        active_sensor->icon_event_box = gtk_event_box_new();
-        gtk_event_box_set_visible_window(GTK_EVENT_BOX(active_sensor->icon_event_box),
-                                         FALSE);
-        gtk_event_box_set_above_child(GTK_EVENT_BOX(active_sensor->icon_event_box),
-                                         TRUE);
-
-        gtk_container_add(GTK_CONTAINER(active_sensor->icon_event_box),
-                          active_sensor->icon);
-        active_sensor->graph_event_box = gtk_event_box_new();
-        gtk_event_box_set_visible_window(GTK_EVENT_BOX(active_sensor->graph_event_box),
-                                         FALSE);
-        gtk_event_box_set_above_child(GTK_EVENT_BOX(active_sensor->graph_event_box),
-                                         TRUE);
-
-        gtk_container_add(GTK_CONTAINER(active_sensor->graph_event_box),
-                          active_sensor->graph_frame);
-        
-
-#endif // GTK VERSION < 2.12
         g_signal_connect(G_OBJECT(active_sensor->graph),
                          "expose_event",
                          G_CALLBACK(graph_expose_event_cb),
@@ -719,11 +660,6 @@ void active_sensor_update(ActiveSensor *active_sensor,
                         tooltip = g_strdup_printf("%s %s", sensor_label, value_tooltip);
                         g_free(value_tooltip);
 
-#if !GTK_CHECK_VERSION(2,12,0)
-                        if (sensors_applet->tooltips == NULL) {
-                                sensors_applet->tooltips = gtk_tooltips_new();
-                        }
-#endif // GTK_CHECK_VERSION < 2.12
                         /* only do icons and labels / graphs if needed */
                         display_mode = panel_applet_gconf_get_int(sensors_applet->applet,
                                                                   DISPLAY_MODE,
@@ -758,15 +694,8 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                         active_sensor_update_icon(active_sensor, icon_pixbuf, sensor_type);
                                 } 
                                 /* always update tooltip */
-#if GTK_CHECK_VERSION(2,12,0)
                                 gtk_widget_set_tooltip_text(active_sensor->icon,
                                                             tooltip);
-#else
-                                gtk_tooltips_set_tip(sensors_applet->tooltips,
-                                                     active_sensor->icon_event_box,
-                                                     tooltip,
-                                                     tooltip);
-#endif
                         }
                         active_sensor_update_sensor_value(active_sensor,
                                                           sensor_value);
@@ -780,15 +709,8 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                                 &(active_sensor->graph_color));
                                 
                                 active_sensor_update_graph(active_sensor);
-#if GTK_CHECK_VERSION(2,12,0)
                                 gtk_widget_set_tooltip_text(active_sensor->graph,
                                                             tooltip);
-#else
-                                gtk_tooltips_set_tip(sensors_applet->tooltips,
-                                                     active_sensor->graph_event_box,
-                                                     tooltip,
-                                                     tooltip);
-#endif
                                 
                         }
 
@@ -838,15 +760,8 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                                      value_text);
                         
 			
-#if GTK_CHECK_VERSION(2,12,0)
                                 gtk_widget_set_tooltip_text(active_sensor->value,
                                                             tooltip);
-#else
-                                gtk_tooltips_set_tip(sensors_applet->tooltips,
-                                                     active_sensor->value_event_box,
-                                                     tooltip,
-                                                     tooltip);
-#endif
                         }
                         /* finished with value text */
                         g_free(value_text);
@@ -860,15 +775,8 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                 }
                                 gtk_label_set_markup(GTK_LABEL(active_sensor->label),
                                                      sensor_label);
-#if GTK_CHECK_VERSION(2,12,0)
                                 gtk_widget_set_tooltip_text(active_sensor->label,
                                                             tooltip);
-#else
-                                gtk_tooltips_set_tip(sensors_applet->tooltips,
-                                                     active_sensor->label_event_box,
-                                                     tooltip,
-                                                     tooltip);
-#endif
 
                         }
 

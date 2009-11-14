@@ -80,12 +80,13 @@ static void help_cb(BonoboUIComponent *uic,
 
         GError *error = NULL;
         
-        gnome_help_display(PACKAGE, NULL,
-                           &error);
+        gtk_show_uri(NULL, "ghelp:sensors-applet",
+		     gtk_get_current_event_time(),
+		     &error);
         
         if (error) {
                 g_debug("Could not open help document: %s ",error->message);
-                g_error_free (error);
+                g_error_free(error);
         }
 }
 
@@ -355,7 +356,6 @@ void sensors_applet_notify_active_sensor(ActiveSensor *active_sensor, NotifType 
                                     
         table_children = gtk_container_get_children(GTK_CONTAINER(sensors_applet->table));
         
-#if GTK_CHECK_VERSION(2,12,0)
         if (g_list_find(table_children, active_sensor->icon)) {
                 attach = GTK_WIDGET(active_sensor->icon);
         } else if (g_list_find(table_children, active_sensor->label)) {
@@ -368,20 +368,6 @@ void sensors_applet_notify_active_sensor(ActiveSensor *active_sensor, NotifType 
                 g_warning("Wanted to do notify for a sensor which has no elements in the table!!!");
                 return;
         }
-#else
-        if (g_list_find(table_children, active_sensor->icon_event_box)) {
-                attach = GTK_WIDGET(active_sensor->icon_event_box);
-        } else if (g_list_find(table_children, active_sensor->label_event_box)) {
-                attach = GTK_WIDGET(active_sensor->label_event_box);
-        } else if (g_list_find(table_children, active_sensor->value_event_box)) {
-                attach = GTK_WIDGET(active_sensor->value_event_box);
-        } else if (g_list_find(table_children, active_sensor->graph_event_box)) {
-                attach = GTK_WIDGET(active_sensor->graph_event_box);
-        } else {
-                g_warning("Wanted to do notify for a sensor which has no elements in the table!!!");
-                return;
-        }
-#endif
         g_list_free(table_children);
         
         path = gtk_tree_row_reference_get_path(active_sensor->sensor_row);
@@ -827,22 +813,14 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
 				if (display_mode == DISPLAY_ICON_WITH_VALUE) {
 					if (((ActiveSensor *)(current_sensor->data))->icon) {
 						gtk_table_attach_defaults(GTK_TABLE(sensors_applet->table),
-#if GTK_CHECK_VERSION(2,12,0)
                                                                           ((ActiveSensor *)(current_sensor->data))->icon,
-#else
-                                                                          ((ActiveSensor *)(current_sensor->data))->icon_event_box,
-#endif
 									  i, i + 1,
 									  j, j + 1);
 					}
 				} else {
 					if (((ActiveSensor *)(current_sensor->data))->label) {
 						gtk_table_attach_defaults(GTK_TABLE(sensors_applet->table),
-#if GTK_CHECK_VERSION(2,12,0)
 									  ((ActiveSensor *)(current_sensor->data))->label,
-#else
-									  ((ActiveSensor *)(current_sensor->data))->label_event_box,
-#endif
                                                                           i, i + 1,
 									  j, j + 1);
 					}				
@@ -865,11 +843,7 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
 					 /* place value next to label */
 					if (((ActiveSensor *)(current_sensor->data))->value) {
 						gtk_table_attach_defaults(GTK_TABLE(sensors_applet->table),
-#if GTK_CHECK_VERSION(2,12,0)
 									  ((ActiveSensor *)(current_sensor->data))->value,
-#else
-									  ((ActiveSensor *)(current_sensor->data))->value_event_box,
-#endif
 									  i + 1, i + 2,
 									  j, j + 1);
 					}
@@ -888,11 +862,7 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
  
 					if (((ActiveSensor *)(current_sensor->data))->value) {
 						gtk_table_attach_defaults(GTK_TABLE(sensors_applet->table),
-#if GTK_CHECK_VERSION(2,12,0)
 									  ((ActiveSensor *)(current_sensor->data))->value,
-#else
-									  ((ActiveSensor *)(current_sensor->data))->value_event_box,
-#endif
 									  i, i + 1,
 									  j + 1, j + 2);
 					}
@@ -920,33 +890,21 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
                                         
                                         if (((ActiveSensor *)(current_sensor->data))->value) {
                                                 gtk_table_attach_defaults(GTK_TABLE(sensors_applet->table),
-#if GTK_CHECK_VERSION(2,12,0)
                                                                           ((ActiveSensor *)(current_sensor->data))->value,
-#else
-                                                                          ((ActiveSensor *)(current_sensor->data))->value_event_box,
-#endif
                                                                           i, i + 1,
                                                                           j, j + 1);
                                         }
                                 } else if (display_mode == DISPLAY_ICON) {
                                         if (((ActiveSensor *)(current_sensor->data))->value) {
                                                 gtk_table_attach_defaults(GTK_TABLE(sensors_applet->table),
-#if GTK_CHECK_VERSION(2,12,0)
                                                                           ((ActiveSensor *)(current_sensor->data))->icon,
-#else
-                                                                          ((ActiveSensor *)(current_sensor->data))->icon_event_box,
-#endif
                                                                           i, i + 1,
                                                                           j, j + 1);
                                         }
                                 } else if (display_mode == DISPLAY_GRAPH) {
                                         if (((ActiveSensor *)(current_sensor->data))->graph) {
                                                 gtk_table_attach_defaults(GTK_TABLE(sensors_applet->table),
-#if GTK_CHECK_VERSION(2,12,0)
                                                                           ((ActiveSensor *)(current_sensor->data))->graph_frame,
-#else
-                                                                          ((ActiveSensor *)(current_sensor->data))->graph_event_box,
-#endif
                                                                           i, i + 1,
                                                                           j, j + 1);
                                         }
@@ -1471,15 +1429,9 @@ void sensors_applet_init(SensorsApplet *sensors_applet) {
 	sensors_applet_update_active_sensors(sensors_applet);
 	sensors_applet_pack_display(sensors_applet);
 
-#if GLIB_CHECK_VERSION(2,14,0)
 	sensors_applet->timeout_id = g_timeout_add_seconds(panel_applet_gconf_get_int(sensors_applet->applet, TIMEOUT, NULL) / 1000, 
                                                            (GSourceFunc)sensors_applet_update_active_sensors, 
                                                            sensors_applet);
-#else
-	sensors_applet->timeout_id = g_timeout_add(panel_applet_gconf_get_int(sensors_applet->applet, TIMEOUT, NULL), 
-                                                   (GSourceFunc)sensors_applet_update_active_sensors, 
-                                                   sensors_applet);
-#endif
 	gtk_widget_show_all(GTK_WIDGET(sensors_applet->applet));
 }
 

@@ -45,9 +45,6 @@ typedef struct {
         
         /* widgets for sensors tree */
         GtkTreeView *view; 
-#if !GTK_CHECK_VERSION(2,12,0)
-        GtkTooltips *view_tooltips;
-#endif
         GtkTreeViewColumn *id_column, *label_column, *enable_column, *icon_column;
         GtkCellRenderer *id_renderer, *label_renderer, *enable_renderer, *icon_renderer;
         GtkScrolledWindow *scrolled_window;

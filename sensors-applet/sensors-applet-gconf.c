@@ -66,7 +66,7 @@ static void sensors_applet_gconf_error_occurred(SensorsAppletGConfError error) {
                                                     GTK_DIALOG_MODAL,
                                                     GTK_MESSAGE_WARNING,
                                                     GTK_BUTTONS_OK,
-                                                    markup);
+                                                    "%s", markup);
 
         g_free(markup);
 

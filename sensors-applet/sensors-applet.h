@@ -136,9 +136,6 @@ struct _SensorsApplet {
 	 * list of labels and sensor values into this container */
 	GtkWidget *table;
 	GList *active_sensors;
-#if !GTK_CHECK_VERSION(2,12,0)
-	GtkTooltips *tooltips;
-#endif
 #ifdef HAVE_LIBNOTIFY
         NotifyNotification *notification;
 #endif // HAVE_LIBNOTIFY

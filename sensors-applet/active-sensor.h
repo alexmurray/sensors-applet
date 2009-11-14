@@ -36,14 +36,6 @@ struct _ActiveSensor {
         GtkWidget *graph;
         GtkWidget *graph_frame;
 
-#if !GTK_CHECK_VERSION(2,12,0)
-        /* allow widgets to display tooltips by giving them each an
-         * event box */
-        GtkWidget *label_event_box;
-        GtkWidget *icon_event_box;
-        GtkWidget *value_event_box;
-        GtkWidget *graph_event_box;
-#endif
         GdkColor graph_color;
 
 	GtkTreeRowReference *sensor_row;

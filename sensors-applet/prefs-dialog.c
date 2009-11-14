@@ -44,11 +44,7 @@ void prefs_dialog_close(SensorsApplet *sensors_applet) {
 
         }
         if (sensors_applet->timeout_id == 0) {
-#if GLIB_CHECK_VERSION(2,14,0)
                 sensors_applet->timeout_id = g_timeout_add_seconds(panel_applet_gconf_get_int(sensors_applet->applet, TIMEOUT, NULL) / 1000, (GSourceFunc)sensors_applet_update_active_sensors, sensors_applet);
-#else
-                sensors_applet->timeout_id = g_timeout_add(panel_applet_gconf_get_int(sensors_applet->applet, TIMEOUT, NULL), (GSourceFunc)sensors_applet_update_active_sensors, sensors_applet);
-#endif
         }
 
 
@@ -61,6 +57,7 @@ void prefs_dialog_response(GtkDialog *prefs_dialog,
         SensorsApplet *sensors_applet;
         GError *error = NULL;
         gint current_page;
+	gchar *uri;
 
         sensors_applet = (SensorsApplet *)data;
 
@@ -68,9 +65,14 @@ void prefs_dialog_response(GtkDialog *prefs_dialog,
         case GTK_RESPONSE_HELP:
                 g_debug("loading help in prefs");
                 current_page = gtk_notebook_get_current_page(sensors_applet->prefs_dialog->notebook);
-
-                gnome_help_display(PACKAGE, ((current_page == 0) ? "sensors-applet-general-options" : ((current_page == 1) ? "sensors-applet-sensors" : NULL)),
-                                   &error);
+		uri = g_strdup_printf("ghelp:sensors-applet?%s",
+				      ((current_page == 0) ?
+				       "sensors-applet-general-options" :
+				       ((current_page == 1) ?
+					"sensors-applet-sensors" :
+					NULL)));
+                gtk_show_uri(NULL, uri, gtk_get_current_event_time(), &error);
+		g_free(uri);
 
                 if (error) {
                         g_debug("Could not open help document: %s ",error->message);
@@ -850,16 +852,8 @@ void prefs_dialog_open(SensorsApplet *sensors_applet) {
         gtk_tree_view_column_set_min_width(prefs_dialog->label_column, 100);
 
         /* create the tooltip */
-#if GTK_CHECK_VERSION(2,12,0)
         gtk_widget_set_tooltip_text(GTK_WIDGET(prefs_dialog->view),
                                     _("Labels can be edited directly by clicking on them."));
-#else
-        prefs_dialog->view_tooltips = gtk_tooltips_new();
-        gtk_tooltips_set_tip(prefs_dialog->view_tooltips,
-                             GTK_WIDGET(prefs_dialog->view),
-                             _("Labels can be edited directly by clicking on them."),
-                             "");
-#endif
         prefs_dialog->enable_column = gtk_tree_view_column_new_with_attributes(_("Enabled"),
                                                                                prefs_dialog->enable_renderer,
                                                                                "active", ENABLE_COLUMN,

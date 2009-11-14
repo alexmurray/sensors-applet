@@ -79,8 +79,10 @@ static void sensor_config_dialog_response(GtkDialog *dialog,
         switch (response) {
         case GTK_RESPONSE_HELP:
                 g_debug("loading help in config dialog");
-                gnome_help_display(PACKAGE, "sensors-applet-sensors",
-                                   &error);
+                gtk_show_uri(NULL,
+			     "ghelp:sensors-applet?sensors-applet-sensors",
+			     gtk_get_current_event_time(),
+			     &error);
                 
                 if (error) {
                         g_debug("Could not open help document: %s ",error->message);
