@@ -9,7 +9,7 @@ INCLUDES = -DGNOMELOCALEDIR=\""$(datadir)/locale/"\" \
         -DSYSCONFDIR=\""$(sysconfdir)"\" \
         -DPREFIX=\""$(prefix)"\" \
 	-I$(top_srcdir) \
-	$(DEVICEKIT_CFLAGS)
+	$(DBUSGLIB_CFLAGS)
 
 
 plugin_LTLIBRARIES = libdevkitdisks.la
@@ -18,5 +18,5 @@ libdevkitdisks_la_SOURCES = \
 	devkit-plugin.h	\
 	devkit-plugin.c
 
-libdevkitdisks_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS) $(DEVICEKIT_LIBS)
+libdevkitdisks_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS) $(DBUSGLIB_LIBS)
 libdevkitdisks_la_LIBADD = $(top_builddir)/lib/libsensors-applet-plugin.la

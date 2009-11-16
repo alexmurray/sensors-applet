@@ -76,23 +76,22 @@ PKG_CHECK_MODULES(CAIRO, cairo >= $LIBCAIRO_REQUIRED)
 AC_SUBST(CAIRO_CFLAGS)
 AC_SUBST(CAIRO_LIBS)
 
-# enable support for devicekit-disks by default if its available
+# enable support for devicekit (via dbus) by default if its available
 AC_ARG_ENABLE(devicekit,
-		AS_HELP_STRING([--enable-devicekit],
-				[Support DeviceKit sensor readings.]),
-		enable_devkit=$enableval,enable_devkit="yes")
+	      AS_HELP_STRING([--enable-devicekit],
+			     [Support DeviceKit sensor readings via DBUS.]),
+			     enable_devkit=$enableval, enable_devkit="yes")
 
 if test "x$enable_devkit" = "xno" ; then
 	echo "Disabling DeviceKit support"
 else
-	PKG_CHECK_MODULES(DEVICEKIT, devkit-gobject >= $LIBDEVKIT_REQUIRED
-				     dbus-glib-1 >= $LIBDBUSGLIB_REQUIRED,
-				     HAVE_DEVICEKIT="yes", HAVE_DEVICEKIT=="no")
-	AC_SUBST(DEVICEKIT_CFLAGS)
-	AC_SUBST(DEVICEKIT_LIBS)
+	PKG_CHECK_MODULES(DBUSGLIB, dbus-glib-1 >= $LIBDBUSGLIB_REQUIRED,
+		          HAVE_DBUSGLIB="yes", HAVE_DEVICEKIT=="no")
+	AC_SUBST(DBUSGLIB_CFLAGS)
+	AC_SUBST(DBUSGLIB_LIBS)
 fi
 
-AM_CONDITIONAL(DEVKIT_DISKS, test -n "$DEVICEKIT_CFLAGS")
+AM_CONDITIONAL(DEVKIT_DISKS, test -n "$DBUSGLIB_CFLAGS")
 
 # support for libnotify
 LIBNOTIFY_CFLAGS=
