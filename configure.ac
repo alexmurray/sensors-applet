@@ -55,8 +55,8 @@ LIBGNOME_REQUIRED=2.8.0
 LIBGNOMEUI_REQUIRED=2.8.0
 LIBNOTIFY_REQUIRED=0.3.0
 LIBCAIRO_REQUIRED=1.0.4
-LIBDEVKIT_REQUIRED=003
 LIBDBUSGLIB_REQUIRED=0.80
+LIBATASMART_REQUIRED=0.16
 
 PKG_CHECK_MODULES(GLIB, glib-2.0 >= $GLIB_REQUIRED)
 AC_SUBST(GLIB_CFLAGS)
@@ -78,17 +78,21 @@ AC_SUBST(CAIRO_LIBS)
 
 # enable support for devicekit (via dbus) by default if its available
 AC_ARG_ENABLE(devicekit,
-	      AS_HELP_STRING([--enable-devicekit],
-			     [Support DeviceKit sensor readings via DBUS.]),
+	      AS_HELP_STRING([--disable-devicekit],
+			     [Disable support for DeviceKit-disks sensor readings via DBUS.]),
 			     enable_devkit=$enableval, enable_devkit="yes")
 
 if test "x$enable_devkit" = "xno" ; then
-	echo "Disabling DeviceKit support"
+	echo "Disabling DeviceKit-disks support"
 else
 	PKG_CHECK_MODULES(DBUSGLIB, dbus-glib-1 >= $LIBDBUSGLIB_REQUIRED,
-		          HAVE_DBUSGLIB="yes", HAVE_DEVICEKIT=="no")
+		          HAVE_DBUSGLIB="yes")
 	AC_SUBST(DBUSGLIB_CFLAGS)
 	AC_SUBST(DBUSGLIB_LIBS)
+
+	PKG_CHECK_MODULES(LIBATASMART, libatasmart >= $LIBATASMART_REQUIRED)
+	AC_SUBST(LIBATASMART_CFLAGS)
+	AC_SUBST(LIBATASMART_LIBS)
 fi
 
 AM_CONDITIONAL(DEVKIT_DISKS, test -n "$DBUSGLIB_CFLAGS")
