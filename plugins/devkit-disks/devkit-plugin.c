@@ -130,6 +130,7 @@ static void devkit_plugin_get_sensors(GList **sensors) {
 				      "DriveAtaSmartTimeCollected",
 				      G_TYPE_INVALID,
 				      G_TYPE_VALUE, &smart_time, G_TYPE_INVALID)) {
+			gchar *id_str, *model_str;
 			/* The DriveAtaSmartTimeCollected property gives the time since
 			 * the Epoch when the last batch of SMART data was collected
 			 * if it is 0 then there is no temperature to get from it anyway
@@ -186,14 +187,18 @@ static void devkit_plugin_get_sensors(GList **sensors) {
 			g_hash_table_insert(devices, info->path, info);
 
 			/* Write the sensor data */
+			id_str = g_value_get_string(&id);
+			model_str = g_value_get_string(&model);
 			sensors_applet_plugin_add_sensor(sensors,
 							 path,
-							 g_value_get_string(&id),
-							 g_value_get_string(&model),
+							 id_str,
+							 model_str,
 							 TEMP_SENSOR,
 							 FALSE,
 							 HDD_ICON,
 							 DEFAULT_GRAPH_COLOR);
+			g_free(id_str);
+			g_free(model_str);
 		} else {
 			g_printerr ("Cannot obtain data for device: %s\n"
 				    "Error: %s\n",
