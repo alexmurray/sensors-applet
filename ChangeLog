@@ -1,3 +1,29 @@
+2009-11-21  Alex Murray <murray.alex@gmail.com>
+
+	* GNOME Sensors Applet Version 2.2.5 Released
+
+	* Port devicekit-disks plugin to use latest devicekit DBus API - now
+	requires libatasmart as a dependency as a result (Patch contributed by
+	Pramod Dematagoda)
+
+2009-11-14  Alex Murray <murray.alex@gmail.com>
+
+	* Cleanup old compatibility code and drop support for older version of
+	GTK+ and Glib - now require 2.14 for both
+
+2009-08-16  Alex Murray <murray.alex@gmail.com>
+
+	* Add zh_CN translation (thanks to lerosua)
+
+2009-07-24  Alex Murray <murray.alex@gmail.com>
+
+	* Add support for monitoring disk temperatures via devicekit-disks
+	(Patch contributed by Pramod Dematagoda)
+
+2009-06-24  Jaap Versteegh <j.r.versteegh@gmail.com>
+
+	* Add support for ATI GPUs using proprietary driver
+
 2009-04-21  Alex Murray  <murray.alex@gmail.com>
 
 	* GNOME Sensors Applet Version 2.2.4 Released
