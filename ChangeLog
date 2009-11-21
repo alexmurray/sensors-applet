@@ -6,6 +6,8 @@
 	requires libatasmart as a dependency as a result (Patch contributed by
 	Pramod Dematagoda)
 
+	* Update Russian translation (thanks to gankov)
+
 2009-11-14  Alex Murray <murray.alex@gmail.com>
 
 	* Cleanup old compatibility code and drop support for older version of
