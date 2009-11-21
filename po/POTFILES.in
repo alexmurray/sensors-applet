@@ -11,6 +11,7 @@ plugins/i2c-proc/i2c-proc-plugin.c
 plugins/acpi/acpi-plugin.c
 plugins/smu-sys/smu-sys-plugin.c
 plugins/eee/eee-plugin.c
+plugins/aticonfig/aticonfig-plugin.c
 sensors-applet/prefs-dialog.c
 sensors-applet/sensors-applet.h
 sensors-applet/active-sensor.c
