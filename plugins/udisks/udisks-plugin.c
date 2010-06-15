@@ -25,13 +25,13 @@
 #include <atasmart.h>
 #include <glib.h>
 #include <dbus/dbus-glib.h>
-#include "devkit-plugin.h"
+#include "udisks-plugin.h"
 
-#define DEVKIT_BUS_NAME              "org.freedesktop.DeviceKit.Disks"
-#define DEVKIT_DEVICE_INTERFACE_NAME "org.freedesktop.DeviceKit.Disks.Device"
-#define DEVKIT_INTERFACE_NAME        "org.freedesktop.DeviceKit.Disks"
-#define DEVKIT_PROPERTIES_INTERFACE  "org.freedesktop.DBus.Properties"
-#define DEVKIT_OBJECT_PATH           "/org/freedesktop/DeviceKit/Disks"
+#define UDISKS_BUS_NAME              "org.freedesktop.UDisks"
+#define UDISKS_DEVICE_INTERFACE_NAME "org.freedesktop.UDisks.Device"
+#define UDISKS_INTERFACE_NAME        "org.freedesktop.UDisks"
+#define UDISKS_PROPERTIES_INTERFACE  "org.freedesktop.DBus.Properties"
+#define UDISKS_OBJECT_PATH           "/org/freedesktop/UDisks"
 
 
 /*
@@ -44,7 +44,7 @@ typedef struct _DevInfo{
 	DBusGProxy *sensor_proxy;
 } DevInfo;
 
-const gchar *plugin_name = "devkit-disks";
+const gchar *plugin_name = "udisks";
 
 GHashTable *devices = NULL;
 
@@ -52,8 +52,8 @@ GHashTable *devices = NULL;
 DBusGConnection *connection;
 
 
-/* This is the handler for the Changed() signal emitted by DeviceKit-Disks. */
-static void devkit_changed_signal_cb(DBusGProxy *sensor_proxy) {
+/* This is the handler for the Changed() signal emitted by UDisks. */
+static void udisks_changed_signal_cb(DBusGProxy *sensor_proxy) {
 	const gchar *path = dbus_g_proxy_get_path(sensor_proxy);
 	DevInfo *info;
 
@@ -64,7 +64,7 @@ static void devkit_changed_signal_cb(DBusGProxy *sensor_proxy) {
 	}
 }
 
-static void devkit_plugin_get_sensors(GList **sensors) {
+static void udisks_plugin_get_sensors(GList **sensors) {
 	DBusGProxy *proxy, *sensor_proxy;
 	GError *error = NULL;
 	GPtrArray *paths;
@@ -89,9 +89,9 @@ static void devkit_plugin_get_sensors(GList **sensors) {
 	 * the device object paths
 	 */
 	proxy = dbus_g_proxy_new_for_name(connection,
-					  DEVKIT_BUS_NAME,
-					  DEVKIT_OBJECT_PATH,
-					  DEVKIT_INTERFACE_NAME);
+					  UDISKS_BUS_NAME,
+					  UDISKS_OBJECT_PATH,
+					  UDISKS_INTERFACE_NAME);
 
 	/* The object paths of the disks are enumerated and placed in an array
 	 * of object paths
@@ -119,13 +119,13 @@ static void devkit_plugin_get_sensors(GList **sensors) {
 		gchar *path = (gchar *)g_ptr_array_index(paths, i);
 
 		sensor_proxy = dbus_g_proxy_new_for_name(connection,
-							 DEVKIT_BUS_NAME,
+							 UDISKS_BUS_NAME,
 							 path,
-							 DEVKIT_PROPERTIES_INTERFACE);
+							 UDISKS_PROPERTIES_INTERFACE);
 
 		if (dbus_g_proxy_call(sensor_proxy, "Get", &error,
 				      G_TYPE_STRING,
-				      DEVKIT_BUS_NAME,
+				      UDISKS_BUS_NAME,
 				      G_TYPE_STRING,
 				      "DriveAtaSmartTimeCollected",
 				      G_TYPE_INVALID,
@@ -142,14 +142,14 @@ static void devkit_plugin_get_sensors(GList **sensors) {
 			}
 
 			dbus_g_proxy_call(sensor_proxy, "Get", NULL,
-					  G_TYPE_STRING, DEVKIT_BUS_NAME,
+					  G_TYPE_STRING, UDISKS_BUS_NAME,
 					  G_TYPE_STRING, "DriveModel",
 					  G_TYPE_INVALID,
 					  G_TYPE_VALUE, &model,
 					  G_TYPE_INVALID);
 
 			dbus_g_proxy_call(sensor_proxy, "Get", NULL,
-					  G_TYPE_STRING, DEVKIT_BUS_NAME,
+					  G_TYPE_STRING, UDISKS_BUS_NAME,
 					  G_TYPE_STRING, "DeviceFile",
 					  G_TYPE_INVALID,
 					  G_TYPE_VALUE, &id,
@@ -158,18 +158,18 @@ static void devkit_plugin_get_sensors(GList **sensors) {
 			g_object_unref(sensor_proxy);
 
 			sensor_proxy = dbus_g_proxy_new_for_name(connection,
-								 DEVKIT_BUS_NAME,
+								 UDISKS_BUS_NAME,
 								 path,
-								 DEVKIT_DEVICE_INTERFACE_NAME);
+								 UDISKS_DEVICE_INTERFACE_NAME);
 
-			/* Use the Changed() signal emitted from DeviceKit to
+			/* Use the Changed() signal emitted from UDisks to
 			 * get the temperature without always polling
 			 */
 			dbus_g_proxy_add_signal(sensor_proxy, "Changed",
 						G_TYPE_INVALID);
 
 			dbus_g_proxy_connect_signal(sensor_proxy, "Changed",
-						    G_CALLBACK(devkit_changed_signal_cb),
+						    G_CALLBACK(udisks_changed_signal_cb),
 						    path, NULL);
 
 			info = g_malloc(sizeof(DevInfo));
@@ -216,7 +216,7 @@ static void devkit_plugin_get_sensors(GList **sensors) {
 		dbus_g_connection_unref (connection);
 }
 
-static gdouble devkit_plugin_get_sensor_value(const gchar *path,
+static gdouble udisks_plugin_get_sensor_value(const gchar *path,
 					      const gchar *id,
 					      SensorType type,
 					      GError **error) {
@@ -243,12 +243,12 @@ static gdouble devkit_plugin_get_sensor_value(const gchar *path,
 	if (info->changed)
 	{
 		sensor_proxy = dbus_g_proxy_new_for_name(connection,
-							 DEVKIT_BUS_NAME,
+							 UDISKS_BUS_NAME,
 							 path,
-							 DEVKIT_PROPERTIES_INTERFACE);
+							 UDISKS_PROPERTIES_INTERFACE);
 
 		if (dbus_g_proxy_call(sensor_proxy, "Get", error,
-				      G_TYPE_STRING, DEVKIT_BUS_NAME,
+				      G_TYPE_STRING, UDISKS_BUS_NAME,
 				      G_TYPE_STRING, "DriveAtaSmartBlob", G_TYPE_INVALID,
 				      G_TYPE_VALUE, &smart_blob_val,
 				      G_TYPE_INVALID))
@@ -277,10 +277,10 @@ static gdouble devkit_plugin_get_sensor_value(const gchar *path,
 	return info->temp;
 }
 
-static GList *devkit_plugin_init(void) {
+static GList *udisks_plugin_init(void) {
 	GList *sensors = NULL;
 
-	devkit_plugin_get_sensors(&sensors);
+	udisks_plugin_get_sensors(&sensors);
 
 	return sensors;
 }
@@ -292,12 +292,12 @@ const gchar *sensors_applet_plugin_name(void)
 
 GList *sensors_applet_plugin_init(void)
 {
-	return devkit_plugin_init();
+	return udisks_plugin_init();
 }
 
 gdouble sensors_applet_plugin_get_sensor_value(const gchar *path,
 					       const gchar *id,
 					       SensorType type,
 					       GError **error) {
-	return devkit_plugin_get_sensor_value(path, id, type, error);
+	return udisks_plugin_get_sensor_value(path, id, type, error);
 }

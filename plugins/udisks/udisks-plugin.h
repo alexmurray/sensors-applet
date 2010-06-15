@@ -16,9 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef DEVKIT_PLUGIN_H
-#define DEVKIT_PLUGIN_H
+#ifndef UDISKS_PLUGIN_H
+#define UDISKS_PLUGIN_H
 
 #include <sensors-applet/sensors-applet-plugin.h>
 
-#endif /* DEVKIT_PLUGIN_H */
+#endif /* UDISKS_PLUGIN_H */

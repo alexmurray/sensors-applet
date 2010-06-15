@@ -1,4 +1,4 @@
-# DEVICEKIT-DISKS plugin
+# UDisks plugin
 plugindir = $(libdir)/sensors-applet/plugins
 
 INCLUDES = -DGNOMELOCALEDIR=\""$(datadir)/locale/"\" \
@@ -14,12 +14,12 @@ INCLUDES = -DGNOMELOCALEDIR=\""$(datadir)/locale/"\" \
 
 
 
-plugin_LTLIBRARIES = libdevkitdisks.la
+plugin_LTLIBRARIES = libudisks.la
 
-libdevkitdisks_la_SOURCES = \
-	devkit-plugin.h	\
-	devkit-plugin.c
+libudisks_la_SOURCES = \
+	udisks-plugin.h	\
+	udisks-plugin.c
 
-libdevkitdisks_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS) $(DBUSGLIB_LIBS) 	$(LIBATASMART_LIBS)
+libudisks_la_LDFLAGS = $(PLUGIN_LIBTOOL_FLAGS) $(DBUSGLIB_LIBS)	$(LIBATASMART_LIBS)
 
-libdevkitdisks_la_LIBADD = $(top_builddir)/lib/libsensors-applet-plugin.la
+libudisks_la_LIBADD = $(top_builddir)/lib/libsensors-applet-plugin.la

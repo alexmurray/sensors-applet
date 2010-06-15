@@ -1,6 +1,6 @@
 DIST_SUBDIRS = \
 	acpi \
-	devkit-disks \
+	udisks \
 	eee \
 	hddtemp \
         i2c-proc \
@@ -26,8 +26,8 @@ SUBDIRS = \
 	smu-sys \
 	sonypi
 
-if DEVKIT_DISKS
-SUBDIRS	     += devkit-disks
+if UDISKS
+SUBDIRS	     += udisks
 endif
 
 if LIBSENSORS

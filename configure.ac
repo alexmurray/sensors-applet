@@ -76,14 +76,14 @@ PKG_CHECK_MODULES(CAIRO, cairo >= $LIBCAIRO_REQUIRED)
 AC_SUBST(CAIRO_CFLAGS)
 AC_SUBST(CAIRO_LIBS)
 
-# enable support for devicekit (via dbus) by default if its available
-AC_ARG_ENABLE(devicekit,
-	      AS_HELP_STRING([--disable-devicekit],
-			     [Disable support for DeviceKit-disks sensor readings via DBUS.]),
-			     enable_devkit=$enableval, enable_devkit="yes")
+# enable support for udisks (via dbus) by default if its available
+AC_ARG_ENABLE(udisks,
+	      AS_HELP_STRING([--disable-udisks],
+			     [Disable support for udisks sensor readings via DBUS.]),
+			     enable_udisks=$enableval, enable_udisks="yes")
 
-if test "x$enable_devkit" = "xno" ; then
-	echo "Disabling DeviceKit-disks support"
+if test "x$enable_udisks" = "xno" ; then
+	echo "Disabling udisks support"
 else
 	PKG_CHECK_MODULES(DBUSGLIB, dbus-glib-1 >= $LIBDBUSGLIB_REQUIRED,
 		          HAVE_DBUSGLIB="yes", HAVE_DBUSGLIB="no")
@@ -96,7 +96,7 @@ else
 	AC_SUBST(LIBATASMART_LIBS)
 fi
 
-AM_CONDITIONAL(DEVKIT_DISKS, test -n "$DBUSGLIB_CFLAGS" -a -n "$LIBATASMART_CFLAGS")
+AM_CONDITIONAL(UDISKS, test -n "$DBUSGLIB_CFLAGS" -a -n "$LIBATASMART_CFLAGS")
 
 # support for libnotify
 LIBNOTIFY_CFLAGS=
@@ -265,7 +265,7 @@ AC_CONFIG_FILES([
 	lib/Makefile
 	plugins/Makefile
 	plugins/acpi/Makefile
-	plugins/devkit-disks/Makefile
+	plugins/udisks/Makefile
 	plugins/eee/Makefile
 	plugins/hddtemp/Makefile
 	plugins/i2c-proc/Makefile
