@@ -28,6 +28,7 @@
 
 static const gchar * const compatible_versions[] = {
         PACKAGE_VERSION, /* always list current version */
+				"2.2.5",
 	"2.2.4",
         "2.2.3",
 	"2.2.2",
