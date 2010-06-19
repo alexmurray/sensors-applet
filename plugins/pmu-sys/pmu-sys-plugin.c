@@ -31,11 +31,13 @@
 const gchar *plugin_name = "pmu-sys";
 
 #define PMU_SYS_BASE_DIR "/sys/devices/temperatures/"
+#define PMU_WT_SYS_BASE_DIR "/sys/devices/temperature/"
 
 #define SENSOR1 "sensor1"
 #define CPU "cpu"
 #define SENSOR2 "sensor2"
 #define GPU "gpu"
+#define CASE "case"
 #define TEMPERATURE "_temperature"
 #define FAN_SPEED "_fan_speed"
 
@@ -65,6 +67,11 @@ static void pmu_sys_plugin_add_sensor(GList **sensors, const gchar *path) {
 		sensor_type = TEMP_SENSOR;
 		enable = TRUE;
 		icon_type = GPU_ICON;
+	} else if (g_ascii_strcasecmp(filename, CASE TEMPERATURE) == 0) {
+		label = g_strdup(_("CASE"));
+		sensor_type = TEMP_SENSOR;
+		enable = TRUE;
+		icon_type = CASE_ICON;
 	} else if (g_ascii_strcasecmp(filename, SENSOR1 FAN_SPEED) == 0|| g_ascii_strcasecmp(filename, CPU FAN_SPEED) == 0) { 
 		label = g_strdup(_("FAN"));
 		sensor_type = FAN_SENSOR;
@@ -101,6 +108,7 @@ static void pmu_sys_plugin_test_sensor(GList **sensors, const gchar *path) {
             g_ascii_strcasecmp(filename, SENSOR1 FAN_SPEED) == 0 ||
             g_ascii_strcasecmp(filename, CPU TEMPERATURE) == 0 ||
             g_ascii_strcasecmp(filename, GPU TEMPERATURE) == 0 ||
+            g_ascii_strcasecmp(filename, CASE TEMPERATURE) == 0 ||
             g_ascii_strcasecmp(filename, CPU FAN_SPEED) == 0) {
                 pmu_sys_plugin_add_sensor(sensors, path);
         }
@@ -114,6 +122,7 @@ GList *pmu_sys_plugin_init(void) {
 	/* call function to recursively look for sensors
 	   starting at the defined base directory */
 	sensors_applet_plugin_find_sensors(&sensors, PMU_SYS_BASE_DIR, pmu_sys_plugin_test_sensor);
+	sensors_applet_plugin_find_sensors(&sensors, PMU_WT_SYS_BASE_DIR, pmu_sys_plugin_test_sensor);
 	return sensors;
 }
 
