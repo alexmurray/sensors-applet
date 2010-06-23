@@ -79,8 +79,8 @@ static void udisks_plugin_get_sensors(GList **sensors) {
 	connection = dbus_g_bus_get(DBUS_BUS_SYSTEM, &error);
 	if (connection == NULL)
 	{
-		g_printerr("Failed to open connection to DBUS: %s",
-			   error->message);
+		g_debug("Failed to open connection to DBUS: %s",
+							error->message);
 		g_error_free(error);
 		return;
 	}
@@ -103,7 +103,7 @@ static void udisks_plugin_get_sensors(GList **sensors) {
 			       &paths,
 			       G_TYPE_INVALID))
 	{
-		g_printerr("Failed to enumerate disk devices: %s",
+		g_debug("Failed to enumerate disk devices: %s",
 			   error->message);
 		g_error_free(error);
 		g_object_unref(proxy);
@@ -115,7 +115,7 @@ static void udisks_plugin_get_sensors(GList **sensors) {
 		/* This proxy is used to get the required data in order to build
 		 * up the list of sensors
 		 */
-		GValue model = {0, }, id = {0, }, smart_time = {0, };
+		GValue model = {0, }, id = {0, }, smart_available = {0, };
 		gchar *path = (gchar *)g_ptr_array_index(paths, i);
 
 		sensor_proxy = dbus_g_proxy_new_for_name(connection,
@@ -127,15 +127,13 @@ static void udisks_plugin_get_sensors(GList **sensors) {
 				      G_TYPE_STRING,
 				      UDISKS_BUS_NAME,
 				      G_TYPE_STRING,
-				      "DriveAtaSmartTimeCollected",
+				      "DriveAtaSmartIsAvailable",
 				      G_TYPE_INVALID,
-				      G_TYPE_VALUE, &smart_time, G_TYPE_INVALID)) {
+				      G_TYPE_VALUE, &smart_available, G_TYPE_INVALID)) {
 			gchar *id_str, *model_str;
-			/* The DriveAtaSmartTimeCollected property gives the time since
-			 * the Epoch when the last batch of SMART data was collected
-			 * if it is 0 then there is no temperature to get from it anyway
-			 */
-			if (!g_value_get_uint64(&smart_time)) {
+			if (!g_value_get_boolean(&smart_available)) {
+				g_debug("Drive at path '%s' does not support Smart monitoring... ignoring",
+					path);
 				g_object_unref(sensor_proxy);
 				g_free (path);
 				continue;
@@ -200,7 +198,7 @@ static void udisks_plugin_get_sensors(GList **sensors) {
 			g_free(id_str);
 			g_free(model_str);
 		} else {
-			g_printerr ("Cannot obtain data for device: %s\n"
+			g_debug ("Cannot obtain data for device: %s\n"
 				    "Error: %s\n",
 				    path,
 				    error->message);
@@ -242,10 +240,22 @@ static gdouble udisks_plugin_get_sensor_value(const gchar *path,
 	 */
 	if (info->changed)
 	{
+		GValue smart_time = { 0, };
 		sensor_proxy = dbus_g_proxy_new_for_name(connection,
 							 UDISKS_BUS_NAME,
 							 path,
 							 UDISKS_PROPERTIES_INTERFACE);
+		if (!dbus_g_proxy_call(sensor_proxy, "Get", error,
+				       G_TYPE_STRING, UDISKS_BUS_NAME,
+				       G_TYPE_STRING, "DriveAtaSmartTimeCollected", G_TYPE_INVALID,
+				       G_TYPE_VALUE, &smart_time,
+				       G_TYPE_INVALID) ||
+		    !g_value_get_uint64(&smart_time))
+		{
+			g_debug("Smart data has not been collected yet... returning 0.0 temp for now to avoid waking drive up unnecessarily");
+			g_object_unref(sensor_proxy);
+			return 0.0;
+		}
 
 		if (dbus_g_proxy_call(sensor_proxy, "Get", error,
 				      G_TYPE_STRING, UDISKS_BUS_NAME,
