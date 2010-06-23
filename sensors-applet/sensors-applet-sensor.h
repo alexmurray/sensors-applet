@@ -57,7 +57,7 @@ typedef struct _SensorsAppletSensorInfo {
         gdouble multiplier;
         gdouble offset;
         IconType icon;
-        const gchar *graph_color; // must be statically allocated
+        gchar *graph_color; // must be dynamically allocated
 } SensorsAppletSensorInfo;
 
 

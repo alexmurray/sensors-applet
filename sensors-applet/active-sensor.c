@@ -782,7 +782,7 @@ void active_sensor_update(ActiveSensor *active_sensor,
 
                         g_free(tooltip);
 		} else {
-                        g_debug("no get_sensor_value function yet installed for interface.");
+                        g_debug("no get_sensor_value function yet installed for interface %s.", sensor_interface);
 		}
 		g_free(sensor_path);
 		g_free(sensor_id);
