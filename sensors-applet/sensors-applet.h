@@ -126,6 +126,7 @@ struct _SensorsApplet {
 	GtkTreeStore *sensors;
 	GtkTreeSelection *selection;
 
+        GHashTable *required_plugins;
         GHashTable *plugins;
         
 	guint timeout_id;

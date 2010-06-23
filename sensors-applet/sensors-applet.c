@@ -1077,6 +1077,14 @@ gboolean sensors_applet_add_sensor(SensorsApplet *sensors_applet,
 
 
 	if (!interface_exists) {
+                /* add to required plugins hash table so we ensure this
+                   plugin stays loaded to make sure we have a get sensor
+                   value function if possible */
+                g_hash_table_insert(sensors_applet->required_plugins,
+                                    g_strdup(interface),
+                                    GINT_TO_POINTER(TRUE));
+                g_debug("added interface %s to required plugins", interface);
+
 		/* wasn't able to find interface root node so create it */
 		gtk_tree_store_append(sensors_applet->sensors,
 				      &interfaces_iter,
@@ -1371,6 +1379,11 @@ void sensors_applet_init(SensorsApplet *sensors_applet) {
          * use standard string functions on hash table */
         sensors_applet->plugins = g_hash_table_new(g_str_hash,
                                                       g_str_equal);
+
+        sensors_applet->required_plugins = g_hash_table_new_full(g_str_hash,
+                                                                 g_str_equal,
+                                                                 g_free,
+                                                                 NULL);
         
         /* initialise size */
         sensors_applet->size = DEFAULT_APPLET_SIZE;
@@ -1389,8 +1402,7 @@ void sensors_applet_init(SensorsApplet *sensors_applet) {
 	/* now do any setup needed manually */
         sensors_applet_plugins_load_all(sensors_applet);        
 
-		
-	/* should have created sensors tree above, but if have
+        /* should have created sensors tree above, but if have
 	   not was because we couldn't find any sensors */
 	if (NULL == sensors_applet->sensors) {
 		GtkWidget *label;	

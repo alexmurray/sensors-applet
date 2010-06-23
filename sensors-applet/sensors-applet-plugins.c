@@ -92,7 +92,18 @@ static void load_all_plugins(SensorsApplet *sensors_applet,
                                                         }
                                                         g_list_free(sensors);
                                                 } else {
-                                                        g_debug("plugin could not find any sensors - unloading it");
+                                                        g_debug("plugin could not find any sensors");
+                                                        if (g_hash_table_lookup(sensors_applet->required_plugins,
+                                                                                name_fn()))
+                                                        {
+                                                                g_debug("plugin is required - registering even though no sensors detected");
+                                                        g_debug("registering plugin %s", name_fn());
+                                                        g_hash_table_insert(sensors_applet->plugins,
+                                                                            g_strdup(name_fn()),
+                                                                            get_value_fn);
+                                                        } else {
+                                                                g_debug("unloading plugin");
+                                                        }
                                                 }
                                                 
                                                                 
