@@ -1,3 +1,16 @@
+2010-06-24  Alex Murray <murray.alex@gmail.com>
+
+	* GNOME Sensors Applet Version 2.27 Released
+
+2010-06-23  Alex Murray <murray.alex@gmail.com>
+
+	* Fix bug #3002075 - value temperature is missing
+
+2010-06-19  Alex Murray <murray.alex@gmail.com>
+
+	* Update the pmu-sys plugin to handle new kernel interface (thanks to
+	Alexey Smazhenko for the patch). Fixes bug LP #402064
+
 2010-06-15  Alex Murray <murray.alex@gmail.com>
 
 	* GNOME Sensors Applet Version 2.2.6 Released
