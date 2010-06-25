@@ -420,6 +420,8 @@ void prefs_dialog_open(SensorsApplet *sensors_applet) {
                                                                       GTK_STOCK_CLOSE,
                                                                       GTK_RESPONSE_CLOSE,
                                                                       NULL));
+        gtk_window_set_icon_name(GTK_WINDOW(prefs_dialog->dialog),
+                                 "sensors-applet");
         g_object_set(prefs_dialog->dialog,
                      "border-width", 12,
                      "default-width", 480,
