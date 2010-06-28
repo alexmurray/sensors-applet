@@ -128,8 +128,6 @@ static void change_background_cb(PanelApplet *applet,
 	GtkRcStyle *rc_style;
 	GtkStyle *style;
 
-        g_debug("change-background occurred");
-
 	/* reset style */
 	gtk_widget_set_style(GTK_WIDGET(applet), NULL);
 	rc_style = gtk_rc_style_new();
@@ -174,7 +172,6 @@ static void size_allocate_cb(PanelApplet *applet,
         SensorsApplet *sensors_applet;
         PanelAppletOrient orient;
 
-        g_debug("size-allocate occurred");
         sensors_applet = (SensorsApplet *)data;
         orient = panel_applet_get_orient(sensors_applet->applet);
         
@@ -209,8 +206,6 @@ static void style_set_cb(GtkWidget *widget,
         DisplayMode display_mode;
 
         sensors_applet = (SensorsApplet *)data;
-
-        g_debug("set-style occurred");
 
         display_mode = panel_applet_gconf_get_int(sensors_applet->applet,
                                                   DISPLAY_MODE,
