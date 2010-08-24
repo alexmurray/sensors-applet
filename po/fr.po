@@ -80,7 +80,7 @@ msgstr "Ventilateur"
 
 #: ../plugins/sonypi/sonypi-plugin.c:62
 msgid "CPU TEMP"
-msgstr ""
+msgstr "CPU TEMP"
 
 #: ../plugins/omnibook/omnibook-plugin.c:46
 #: ../sensors-applet/sensors-applet.c:413
@@ -221,7 +221,7 @@ msgstr "A"
 #. hard code text as ERROR
 #: ../sensors-applet/active-sensor.c:578
 msgid "ERROR"
-msgstr ""
+msgstr "ERREUR"
 
 #: ../sensors-applet/about-dialog.c:33
 msgid "Translator"
@@ -303,26 +303,27 @@ msgstr "Alarme _activée"
 #: ../sensors-applet/sensors-applet.c:297
 #, fuzzy, c-format
 msgid "Error restoring saved sensor configuration."
-msgstr "Configuration de capteurs incompatible"
+msgstr "Erreur lors de la restauration de la configuration du capteur."
 
 #: ../sensors-applet/sensors-applet.c:298
 #, c-format
 msgid ""
 "An error occurred while trying to restore the saved sensor configuration. "
 "The previous configuration has been lost and will need to be re-entered."
-msgstr ""
+msgstr "Une erreur est survenue lors de la restauration de la configuration du capteur. "
+"La configuration précédente a été perdue et devra être resaisie."
 
 #: ../sensors-applet/sensors-applet.c:302
 #, fuzzy, c-format
 msgid "Error saving sensor configuration."
-msgstr "Configuration de capteurs incompatible"
+msgstr "Erreur lors de la sauvegarde de la configuration du capteur."
 
 #: ../sensors-applet/sensors-applet.c:303
 #, fuzzy, c-format
 msgid ""
 "An error occurred while trying to save the current sensor configuration. "
 msgstr ""
-"Une erreur est survenue lors du chargement des préférences des capteurs"
+"Une erreur est survenue lors de la sauvegarde de la configuration courante du capteur."
 
 #: ../sensors-applet/sensors-applet.c:394
 msgid "is very low"
@@ -372,7 +373,7 @@ msgstr "courant"
 #: ../sensors-applet/sensors-applet.c:458
 #, c-format
 msgid "Error updating sensor %s"
-msgstr ""
+msgstr "Erreur lors de la mise à jour du capteur %s"
 
 #: ../sensors-applet/sensors-applet.c:459
 #, fuzzy, c-format
