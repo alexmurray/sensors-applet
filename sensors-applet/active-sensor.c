@@ -262,7 +262,7 @@ static void active_sensor_update_graph(ActiveSensor *as) {
 
         /* only do if drawable - will not be drawable if not currently
          * displayed on screen */
-        if (GDK_IS_DRAWABLE(as->graph->window)) {
+        if (as->graph->window && GDK_IS_DRAWABLE(as->graph->window)) {
                 /* use pixmap, draw to it, then use gdk to draw the
                  * pixmap onto the drawable surface of the graph to
                  * stop flickering */
