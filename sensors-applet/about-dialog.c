@@ -30,7 +30,7 @@ void about_dialog_open(SensorsApplet *sensors_applet) {
 		NULL
 	};
 
-	if (_("Translator") == "Translator") {
+	if (strcmp(_("Translator"), "Translator") == 0) {
 		translator = NULL;
 	} else {
 		translator = g_strdup(_("To translator: Put your name here to show up in the About dialog as the translator"));
@@ -39,7 +39,7 @@ void about_dialog_open(SensorsApplet *sensors_applet) {
 	/* Construct the about dialog */
 	gtk_show_about_dialog(NULL,
 			      "icon-name", "sensors-applet",
-			      "program-name", PACKAGE_NAME, 
+			      "program-name", PACKAGE_NAME,
 			      "version", PACKAGE_VERSION,
 			      "copyright", "(C) 2005-2009, Alex Murray <murray.alex@gmail.com>",
 			      "authors", authors,

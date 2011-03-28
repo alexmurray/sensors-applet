@@ -40,6 +40,8 @@
 #include <string.h>
 #endif
 
+#include <unistd.h>
+#include <string.h>
 #include "hddtemp-plugin.h"
 
 const gchar *plugin_name = "hddtemp";
@@ -53,7 +55,7 @@ enum {
 	HDDTEMP_SOCKET_CONNECT_ERROR,
 	HDDTEMP_GIOCHANNEL_ERROR,
 	HDDTEMP_GIOCHANNEL_READ_ERROR
-	
+
 };
 
 static gchar buffer[HDDTEMP_OUTPUT_BUFFER_LENGTH];
@@ -112,14 +114,14 @@ static const gchar *hddtemp_plugin_query_hddtemp_daemon(GError **error) {
 
 	return buffer;
 }
-	
+
 static void hddtemp_plugin_get_sensors(GList **sensors) {
 	GError *error = NULL;
 	const gchar *hddtemp_output;
 	gchar **output_vector = NULL, **pv;
-	
+
 	hddtemp_output = hddtemp_plugin_query_hddtemp_daemon(&error);
-	
+
 	if (error) {
 		g_error_free(error);
 		return;
@@ -130,12 +132,12 @@ static void hddtemp_plugin_get_sensors(GList **sensors) {
 		return;
 	}
 
-	/* for each sensor the output will contain four strings ie 
+	/* for each sensor the output will contain four strings ie
 	   |/dev/hda|WDC WD800JB-00ETA0|32|C||/dev/hdb|???|ERR|*|
 	   note the repetition -----^ */
 
 	/*
-	  
+
 	  pv[0 + 5*n] empty
 	  pv[1 + 5*n] device name
 	  pv[2 + 5*n] disk label
@@ -146,9 +148,14 @@ static void hddtemp_plugin_get_sensors(GList **sensors) {
 	*/
 
 	pv = output_vector = g_strsplit(hddtemp_output, "|", -1);
-	
+
 	while(pv[1] != NULL) {
-		if (pv[2] != "" && pv [3] != "" && pv[4] != "" && (!(g_ascii_strcasecmp(pv[2], "???") == 0 || g_ascii_strcasecmp(pv[3], "ERR") == 0 || g_ascii_strcasecmp(pv[4], "*") == 0))) {
+		if (strcmp(pv[2], "") != 0 &&
+		    strcmp(pv[3], "") != 0 &&
+		    strcmp(pv[4], "") != 0 &&
+		    (!(g_ascii_strcasecmp(pv[2], "???") == 0 ||
+		       g_ascii_strcasecmp(pv[3], "ERR") == 0 ||
+		       g_ascii_strcasecmp(pv[4], "*") == 0))) {
                         sensors_applet_plugin_add_sensor(sensors,
                                                         pv[1], // must be dynamically allocated
                                                         pv[1], // must be dynamically allocated
@@ -158,7 +165,7 @@ static void hddtemp_plugin_get_sensors(GList **sensors) {
                                                         HDD_ICON,
                                                         DEFAULT_GRAPH_COLOR);
 		}
-		pv += 5; 
+		pv += 5;
 	}
 	g_strfreev(output_vector);
 }
@@ -166,15 +173,15 @@ static void hddtemp_plugin_get_sensors(GList **sensors) {
 /* to be called to setup for hddtemp sensors */
 static GList *hddtemp_plugin_init(void) {
 	GList *sensors = NULL;
-	hddtemp_plugin_get_sensors(&sensors);		
+	hddtemp_plugin_get_sensors(&sensors);
         return sensors;
 }
 
 
 /* returns the value of the sensor_list at the given iter, or if an
    error occurs, instatiates error with an error message */
-static gdouble hddtemp_plugin_get_sensor_value(const gchar *path, 
-						  const gchar *id, 
+static gdouble hddtemp_plugin_get_sensor_value(const gchar *path,
+						  const gchar *id,
 						  SensorType type,
 						  GError **error) {
 
@@ -194,9 +201,9 @@ static gdouble hddtemp_plugin_get_sensor_value(const gchar *path,
 		return sensor_value;
 	}
 
-	/* for each sensor the output will contain four strings ie 
+	/* for each sensor the output will contain four strings ie
 	   |/dev/hda|WDC WD800JB-00ETA0|32|C||/dev/hdb|???|ERR|*|
-	            note the repetition -----^ 
+	            note the repetition -----^
 
 	  pv[0 + 5*n] empty
 	  pv[1 + 5*n] device name
@@ -208,36 +215,36 @@ static gdouble hddtemp_plugin_get_sensor_value(const gchar *path,
 	*/
 
 	pv = output_vector = g_strsplit(hddtemp_output, "|", -1);
-	
+
 	while(pv[1] != NULL) {
 		if (g_ascii_strcasecmp(pv[1], path) == 0) {
 			sensor_value = (gfloat)(g_ascii_strtod(pv[3], NULL));
-	
+
 			/* always return sensor values in celsius */
 			if (pv[4][0] == 'F') {
 				sensor_value = (sensor_value - 32.0) * 5.0 / 9.0;
 			}
 			break;
 		}
-		pv += 5; 
+		pv += 5;
 	}
 	g_strfreev(output_vector);
-	
+
 	return (gdouble)sensor_value;
 }
 
-const gchar *sensors_applet_plugin_name(void) 
+const gchar *sensors_applet_plugin_name(void)
 {
         return plugin_name;
 }
 
-GList *sensors_applet_plugin_init(void) 
+GList *sensors_applet_plugin_init(void)
 {
         return hddtemp_plugin_init();
 }
 
-gdouble sensors_applet_plugin_get_sensor_value(const gchar *path, 
-                                                const gchar *id, 
+gdouble sensors_applet_plugin_get_sensor_value(const gchar *path,
+                                                const gchar *id,
                                                 SensorType type,
                                                 GError **error) {
         return hddtemp_plugin_get_sensor_value(path, id, type, error);
