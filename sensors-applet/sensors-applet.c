@@ -28,7 +28,8 @@
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
-#include <gnome.h>
+#include <gdk/gdkx.h>
+#include <glib/gi18n.h>
 #include <glib/gprintf.h>
 #include "sensors-applet.h"
 #include "active-sensor.h"
@@ -51,7 +52,7 @@
 #define ROW_SPACING 0
 
 /* callbacks for panel menu */
-static void prefs_cb(BonoboUIComponent *uic,
+static void prefs_cb(GtkAction *action,
 		     gpointer *data,
 		     const gchar       *verbname) {
 
@@ -65,7 +66,7 @@ static void prefs_cb(BonoboUIComponent *uic,
 	prefs_dialog_open(sensors_applet);
 }
 
-static void about_cb(BonoboUIComponent *uic,
+static void about_cb(GtkAction *action,
 		     gpointer data,
 		     const gchar       *verbname) {
         SensorsApplet *sensors_applet;
@@ -74,7 +75,7 @@ static void about_cb(BonoboUIComponent *uic,
 	about_dialog_open(sensors_applet);
 }
 
-static void help_cb(BonoboUIComponent *uic, 
+static void help_cb(GtkAction *action,
                     gpointer data,
                     const gchar *verbname) {
 
@@ -120,11 +121,18 @@ static void destroy_cb(GtkWidget *widget, gpointer data) {
 	return;
 }
 
-static void change_background_cb(PanelApplet *applet, 
-				 PanelAppletBackgroundType type,
-				 GdkColor *color, 
-				 GdkPixmap *pixmap, 
-				 gpointer *data) {
+static gboolean
+matrix_is_identity (cairo_matrix_t *matrix)
+{
+	return matrix->xx == 1.0 && matrix->yy == 1.0 &&
+		matrix->yx == 0.0 && matrix->xy == 0.0 &&
+		matrix->x0 == 0.0 && matrix->y0 == 0.0;
+}
+
+
+static void change_background_cb(PanelApplet *applet,
+				cairo_pattern_t *pattern,
+				gpointer *data) {
 	GtkRcStyle *rc_style;
 	GtkStyle *style;
 
@@ -132,26 +140,46 @@ static void change_background_cb(PanelApplet *applet,
 	gtk_widget_set_style(GTK_WIDGET(applet), NULL);
 	rc_style = gtk_rc_style_new();
 	gtk_widget_modify_style(GTK_WIDGET(applet), rc_style);
-	gtk_rc_style_unref(rc_style);
+	g_object_unref(rc_style);
 
-	switch(type) {
-	case PANEL_COLOR_BACKGROUND:
-		gtk_widget_modify_bg(GTK_WIDGET(applet),
-				     GTK_STATE_NORMAL, color);
-		break;
+	if (pattern == NULL) {
+		return;
+	}
 
-	case PANEL_PIXMAP_BACKGROUND:
-		style = gtk_style_copy(GTK_WIDGET(applet)->style);
-		if (style->bg_pixmap[GTK_STATE_NORMAL]) {
-			g_object_unref(style->bg_pixmap[GTK_STATE_NORMAL]);
+	switch (cairo_pattern_get_type (pattern)) {
+		case CAIRO_PATTERN_TYPE_SOLID: {
+			double r, b, g, a;
+			GdkColor color;
+
+			cairo_pattern_get_rgba (pattern, &r, &g, &b, &a);
+			color.pixel = 0;
+			color.red = r * 65535.;
+			color.green = g * 65535.;
+			color.blue = b * 65535.;
+			gtk_widget_modify_bg (GTK_WIDGET(applet), GTK_STATE_NORMAL, &color);
+			break;
 		}
-		style->bg_pixmap[GTK_STATE_NORMAL] = g_object_ref(pixmap);
-		gtk_widget_set_style(GTK_WIDGET(applet), style);
-		g_object_unref(style);
-		break;
+		case CAIRO_PATTERN_TYPE_SURFACE: {
+			cairo_surface_t *surface;
+			cairo_matrix_t matrix;
+			GdkWindow *window;
 
-	case PANEL_NO_BACKGROUND:
-		/* fall through */
+			window = gtk_widget_get_window (GTK_WIDGET(applet));
+			cairo_pattern_get_matrix (pattern, &matrix);
+			if (cairo_pattern_get_surface (pattern, &surface) == CAIRO_STATUS_SUCCESS &&
+				matrix_is_identity (&matrix) &&
+				cairo_surface_get_type (surface) == CAIRO_SURFACE_TYPE_XLIB &&
+				cairo_xlib_surface_get_visual (surface) == GDK_VISUAL_XVISUAL (gdk_window_get_visual ((window))) &&
+				cairo_xlib_surface_get_display (surface) == GDK_WINDOW_XDISPLAY (window)) {
+				style = gtk_style_copy (gtk_widget_get_style (GTK_WIDGET(applet)));
+				if (style->background[GTK_STATE_NORMAL])
+				cairo_pattern_destroy (style->background[GTK_STATE_NORMAL]);
+				style->background[GTK_STATE_NORMAL] = cairo_pattern_reference (pattern);
+				gtk_widget_set_style (GTK_WIDGET(applet), style);
+				g_object_unref (style);
+			}
+			break;
+		}
 	default:
 		break;
 	}
@@ -250,16 +278,21 @@ static void style_set_cb(GtkWidget *widget,
             
 }
 
-static const BonoboUIVerb sensors_applet_menu_verbs[] = {
-	BONOBO_UI_UNSAFE_VERB("Preferences", prefs_cb),
-	BONOBO_UI_UNSAFE_VERB ("Help", help_cb),
-	BONOBO_UI_UNSAFE_VERB("About", about_cb),
-	BONOBO_UI_VERB_END
+static const GtkActionEntry sensors_applet_menu_actions[] = {
+	{ "Preferences", GTK_STOCK_PROPERTIES, N_("_Preferences"),
+		NULL, NULL,
+		G_CALLBACK(prefs_cb) },
+	{ "Help", GTK_STOCK_HELP, N_("_Help"),
+		NULL, NULL,
+		G_CALLBACK(help_cb) },
+	{ "About", GTK_STOCK_ABOUT, N_("_About"),
+		NULL, NULL,
+		G_CALLBACK(about_cb) }
 };
 
 #ifdef HAVE_LIBNOTIFY
 static void notif_closed_cb(NotifyNotification *notification,
-                            SensorsApplet *sensors_applet) 
+                            SensorsApplet *sensors_applet)
 {
         g_assert(sensors_applet);
         
@@ -301,8 +334,7 @@ void sensors_applet_notify(SensorsApplet *sensors_applet,
         
         sensors_applet->notification = notify_notification_new(summary,
                                                                message,
-                                                               GTK_STOCK_DIALOG_WARNING,
-                                                               GTK_WIDGET(sensors_applet->applet));
+                                                               GTK_STOCK_DIALOG_WARNING);
         g_free(summary);
         g_free(message);
         
@@ -466,9 +498,8 @@ void sensors_applet_notify_active_sensor(ActiveSensor *active_sensor, NotifType 
                                        notif_type,
                                        summary,
                                        message,
-                                       GTK_STOCK_DIALOG_WARNING,
-                                       timeout_msecs,
-                                       attach);
+				       GTK_STOCK_DIALOG_WARNING,
+                                       timeout_msecs);
         
         g_free(sensor_path);
         g_free(sensor_label);
@@ -610,7 +641,6 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
         /* get the first active sensor */
         first_sensor = (ActiveSensor *)sensors_applet->active_sensors->data;
 
-
         switch (display_mode) {
         case DISPLAY_VALUE:
                 gtk_widget_size_request(GTK_WIDGET(first_sensor->value),
@@ -683,10 +713,13 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
                 icon_width = req.width + COLUMN_SPACING;
                 icon_height = req.height + ROW_SPACING;
                 
-                if (!(icon_width && icon_height &&
+                //watch out if num_sensors_per_group is correctly computed
+		//while icon_height is 0
+                if (!(icon_width &&
                       value_width && value_height)) {
                         return;
                 }
+
                 
                 switch (layout_mode) {
                 case VALUE_BESIDE_LABEL:
@@ -1366,6 +1399,9 @@ gdouble sensors_applet_convert_temperature(gdouble value,
 }
 
 void sensors_applet_init(SensorsApplet *sensors_applet) {
+
+	GtkActionGroup *action_group;
+	gchar *ui_path;
 	
         g_assert(sensors_applet);
 	g_assert(sensors_applet->applet);
@@ -1408,12 +1444,16 @@ void sensors_applet_init(SensorsApplet *sensors_applet) {
 	}
 	
         /* only do menu and signal connections if sensors are found */
-	panel_applet_setup_menu_from_file(sensors_applet->applet,
-					  DATADIR,
-					  SENSORS_APPLET_MENU_FILE,
-					  NULL,
-					  sensors_applet_menu_verbs,
-					  sensors_applet);
+	action_group = gtk_action_group_new ("Sensors Applet Actions");
+	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
+	gtk_action_group_add_actions (action_group,
+		sensors_applet_menu_actions,
+		G_N_ELEMENTS (sensors_applet_menu_actions),
+		sensors_applet);
+	ui_path = g_build_filename (UIDIR, SENSORS_APPLET_MENU_FILE, NULL);
+	panel_applet_setup_menu_from_file (sensors_applet->applet, ui_path, action_group);
+	g_free (ui_path);
+	g_object_unref (action_group);
 
 	g_signal_connect(sensors_applet->applet, "style-set",
 			 G_CALLBACK(style_set_cb),

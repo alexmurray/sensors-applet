@@ -24,12 +24,13 @@
 #include <string.h>
 #include "sensors-applet.h"
 
-static gboolean sensors_applet_fill(PanelApplet *applet, 
-                                    const gchar *iid, 
+static gboolean sensors_applet_fill(PanelApplet *applet,
+                                    const gchar *iid,
                                     gpointer data) {
 	SensorsApplet *sensors_applet;
 	gboolean retval = FALSE;
-        if (strcmp(iid, "OAFIID:SensorsApplet") == 0) {
+
+        if (strcmp(iid, "SensorsApplet") == 0) {
 		sensors_applet = g_new0(SensorsApplet, 1);
 		sensors_applet->applet = applet;
 		sensors_applet_init(sensors_applet);
@@ -38,9 +39,7 @@ static gboolean sensors_applet_fill(PanelApplet *applet,
 	return retval;
 }
 
-PANEL_APPLET_BONOBO_FACTORY ("OAFIID:SensorsApplet_Factory", 
-			     PANEL_TYPE_APPLET, 
-			     PACKAGE, 
-			     PACKAGE_VERSION, 
-			     sensors_applet_fill, 
-			     NULL);
+PANEL_APPLET_OUT_PROCESS_FACTORY ("SensorsAppletFactory",
+                                PANEL_TYPE_APPLET,
+                                sensors_applet_fill,
+                                NULL);

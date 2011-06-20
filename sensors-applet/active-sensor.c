@@ -25,7 +25,9 @@
 #endif /* HAVE_STRING_H */
 
 #include <gconf/gconf-client.h>
-#include <gnome.h>
+#include <glib.h>
+#include <glib/gi18n.h>
+#include <gtk/gtk.h>
 
 #include "active-sensor.h"
 #include "sensors-applet-plugins.h"
@@ -255,21 +257,24 @@ static void active_sensor_update_graph(ActiveSensor *as) {
         cairo_t *cr;
         cairo_pattern_t *pattern;
         gint i;
-        GdkPixmap *pixmap;
+        cairo_surface_t *surface;
+	GtkAllocation alloc;
+	GtkStyle *style;
 
-        width = as->graph->allocation.width;
-        height = as->graph->allocation.height;
+	gtk_widget_get_allocation(as->graph, &alloc);
+	width = alloc.width;
+	height = alloc.height;
 
         /* only do if drawable - will not be drawable if not currently
          * displayed on screen */
-        if (as->graph->window && GDK_IS_DRAWABLE(as->graph->window)) {
-                /* use pixmap, draw to it, then use gdk to draw the
-                 * pixmap onto the drawable surface of the graph to
-                 * stop flickering */
-                pixmap = gdk_pixmap_new(as->graph->window,
-                                        width, height, -1);
+        if (gtk_widget_get_window(as->graph)) {
+	//&& GDK_IS_DRAWABLE(gtk_widget_get_window(as->graph))) {
+		surface = gdk_window_create_similar_surface (
+				gtk_widget_get_window (as->graph),
+				CAIRO_CONTENT_COLOR_ALPHA,
+				width, height);
 
-                cr = gdk_cairo_create(pixmap);
+                cr = cairo_create(surface);
 
                 /* so we can set a clipping area, as well as fill the
                  * back of the graph black */
@@ -332,31 +337,36 @@ static void active_sensor_update_graph(ActiveSensor *as) {
                 cairo_pattern_destroy(pattern);
                 cairo_destroy(cr);
 
+		style = gtk_widget_get_style (GTK_WIDGET (as->graph));
+
                 /* now draw pixmap onto drawable surface */
-                gdk_draw_drawable(as->graph->window,
-                                  as->graph->style->fg_gc[GTK_WIDGET_STATE(as->graph)],
+/*                gdk_draw_drawable(gtk_widget_get_window(as->graph),
+				  &style->fg[GTK_STATE_NORMAL],
                                   pixmap,
                                   0, 0,
                                   0, 0,
-                                  -1, -1);
+                                  -1, -1);*
                 /* don't need pixmap anymore */
-                g_object_unref(pixmap);
+/*                g_object_unref(pixmap);*/
+
+		cairo_set_source_surface (cr, surface, x, y);
+		cairo_paint (cr);
         }
 }
 
 void active_sensor_destroy(ActiveSensor *active_sensor) {
         g_debug("-- destroying active sensor label...");
-        gtk_object_destroy(GTK_OBJECT(active_sensor->label));
+        gtk_widget_destroy(active_sensor->label);
 
         g_debug("-- destroying active sensor icon..");
-        gtk_object_destroy(GTK_OBJECT(active_sensor->icon));
+        gtk_widget_destroy(active_sensor->icon);
 
         g_debug("-- destroying active sensor value...");
-        gtk_object_destroy(GTK_OBJECT(active_sensor->value));
+        gtk_widget_destroy(active_sensor->value);
 
         g_debug("-- destroying active sensor graph and frame...");
-        gtk_object_destroy(GTK_OBJECT(active_sensor->graph));
-        gtk_object_destroy(GTK_OBJECT(active_sensor->graph_frame));
+        gtk_widget_destroy(active_sensor->graph);
+        gtk_widget_destroy(active_sensor->graph_frame);
 
         g_debug("-- destroying active sensor values...");
         g_free(active_sensor->sensor_values);
@@ -600,7 +610,6 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                         g_object_unref(client);
                                 }
 
-
                                 /* scale value and set text using this
                                  * value */
 				switch (sensor_type) {
@@ -655,7 +664,6 @@ void active_sensor_update(ActiveSensor *active_sensor,
 				
                                 } /* end switch(sensor_type) */
                         } /* end else on error */
-
                         /* setup for tooltips */
                         tooltip = g_strdup_printf("%s %s", sensor_label, value_tooltip);
                         g_free(value_tooltip);
@@ -679,8 +687,6 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                 
                                 g_object_unref(client);
                         }
-
-                                                
                         /* do icon if needed */
                         if (display_mode == DISPLAY_ICON ||
                             display_mode == DISPLAY_ICON_WITH_VALUE) {
@@ -701,7 +707,6 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                                           sensor_value);
                         active_sensor->sensor_low_value = sensor_low_value;
                         active_sensor->sensor_high_value = sensor_high_value;
-                
                         /* do graph if needed */
                         if (display_mode == DISPLAY_GRAPH) {
                                 /* update graph color in case has changed */
@@ -713,9 +718,7 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                                             tooltip);
                                 
                         }
-
                         old_value_text = value_text;
-
                         if (sensor_alarm_enabled) {
                                 if (sensor_value >= sensor_high_value || 
                                     sensor_value <= sensor_low_value) {

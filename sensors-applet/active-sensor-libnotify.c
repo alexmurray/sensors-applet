@@ -64,9 +64,8 @@ void active_sensor_libnotify_notify(ActiveSensor *active_sensor,
                                     NotifType notif_type,
                                     const gchar *summary,
                                     const gchar *message,
-                                    const gchar *icon_filename,
-                                    gint timeout_msecs,
-                                    GtkWidget *attach) {
+				    const gchar *icon_filename,
+                                    gint timeout_msecs) {
         GError *error = NULL;
 
         if (!notify_is_initted()) {
@@ -86,8 +85,7 @@ void active_sensor_libnotify_notify(ActiveSensor *active_sensor,
         g_debug("Creating new notification");
         active_sensor->notification[notif_type] = notify_notification_new(summary,
                                                                           message,
-                                                                          icon_filename,
-                                                                          attach);
+                                                                          icon_filename);
         g_signal_connect(active_sensor->notification[notif_type], "closed",
                          G_CALLBACK(notif_closed_cb),
                          active_sensor);

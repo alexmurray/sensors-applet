@@ -2,8 +2,9 @@
 INCLUDES = -DGNOMELOCALEDIR=\""$(datadir)/locale/"\" \
 	-DG_LOG_DOMAIN=\""Sensors Applet"\" \
 	-DPIXMAPS_DIR=\""$(datadir)/pixmaps/$(PACKAGE)/"\" \
-	-DDATADIR=\""$(datadir)"\" \
+	-DDATADIR=\""$(datadir)/sensors-applet"\" \
 	-DLIBDIR=\""$(libdir)"\" \
+	-DUIDIR=\""$(pkgdatadir)/ui"\" \
 	-DSENSORS_APPLET_PLUGIN_DIR=\""$(libdir)/$(PACKAGE)/plugins/"\" \
         -DSYSCONFDIR=\""$(sysconfdir)"\" \
         -DPREFIX=\""$(prefix)"\" \
@@ -11,7 +12,7 @@ INCLUDES = -DGNOMELOCALEDIR=\""$(datadir)/locale/"\" \
 	$(GLIB_CFLAGS) $(GTK_CFLAGS) $(GNOME_CFLAGS) $(CAIRO_CFLAGS) $(LIBNOTIFY_CFLAGS)
 
 
-LIBS = $(GLIB_LIBS) $(GTK_LIBS) $(GNOME_LIBS) $(CAIRO_LIBS) $(LIBNOTIFY_LIBS)
+LIBS = $(GLIB_LIBS) $(GTK_LIBS) $(GNOME_LIBS) $(CAIRO_LIBS) $(LIBNOTIFY_LIBS) -ldl
 
 if LIBNOTIFY
 libnotify_SRC = active-sensor-libnotify.c \

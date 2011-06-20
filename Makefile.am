@@ -1,19 +1,32 @@
 SUBDIRS = sensors-applet lib plugins pixmaps po help
 
-serverdir 	= $(libdir)/bonobo/servers
-server_in_files = SensorsApplet.server.in
-server_DATA 	= $(server_in_files:.server.in=.server)
+appletdir = $(LIBPANEL_APPLET_DIR)
+applet_in_files = org.gnome.applets.SensorsApplet.panel-applet.in
+applet_DATA = $(applet_in_files:.panel-applet.in=.panel-applet)
 
-$(server_in_files): $(server_in_files:.server.in=.server.in.in) Makefile
-	sed -e "s|\@DATADIR\@|$(datadir)|" -e "s|\@LIBEXECDIR\@|$(libexecdir)|" -e "s|\@PACKAGE\@|$(PACKAGE)|" $< > $@
+$(applet_in_files): $(applet_in_files).in Makefile
+	$(AM_V_GEN)sed \
+	-e "s|\@LIBEXECDIR\@|$(libexecdir)|" \
+	-e "s|\@VERSION\@|$(PACKAGE_VERSION)|" \
+	$< > $@
 
 @INTLTOOL_SERVER_RULE@
 
-uidir 		= $(datadir)/gnome-2.0/ui
+uidir 		= $(pkgdatadir)/ui
 ui_DATA 	= SensorsApplet.xml
 
-CLEANFILES 	=  $(server_in_files) \
-		   $(server_DATA)
+%.panel-applet: %.panel-applet.in $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*po) ; $(INTLTOOL_MERGE) $(top_srcdir)/po $< $@ -d -u -c $(top_builddir)/po/.intltool-merge-cache
+
+servicedir = $(datadir)/dbus-1/services
+service_in_files = org.gnome.panel.applet.SensorsAppletFactory.service.in
+service_DATA = $(service_in_files:.service.in=.service)
+
+org.gnome.panel.applet.SensorsAppletFactory.service: $(service_in_files)
+	$(AM_V_GEN)sed \
+	-e "s|\@LIBEXECDIR\@|$(libexecdir)|" \
+	$< > $@
+
+CLEANFILES = $(applet_DATA) $(applet_DATA).in $(service_DATA) $(schemas_DATA)
 
 EXTRA_DIST 	= $(ui_DATA) \
 		  $(server_DATA:.server=.server.in.in) \

@@ -20,6 +20,8 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#include <glib/gi18n.h>
+
 #include "sensors-applet.h"
 #include "sensors-applet-gconf.h"
 
@@ -88,7 +90,7 @@ static void sensors_applet_gconf_set_defaults(SensorsApplet *sensors_applet) {
 	panel_applet_gconf_set_int(sensors_applet->applet, GRAPH_SIZE, DEFAULT_GRAPH_SIZE, NULL);
 #ifdef HAVE_LIBNOTIFY
 	panel_applet_gconf_set_bool(sensors_applet->applet, DISPLAY_NOTIFICATIONS, TRUE, NULL);
-#endif        
+#endif
 	panel_applet_gconf_set_bool(sensors_applet->applet, IS_SETUP, FALSE, NULL);
 
 }
@@ -161,7 +163,7 @@ void sensors_applet_gconf_setup(SensorsApplet *sensors_applet) {
                 
         }
 
-        setup = panel_applet_gconf_get_bool(sensors_applet->applet, 
+        setup = panel_applet_gconf_get_bool(sensors_applet->applet,
                                             IS_SETUP, &error);
         if (error) {
                 g_debug("Previous configuration not found: %s, setting up manually", error->message);
@@ -169,7 +171,6 @@ void sensors_applet_gconf_setup(SensorsApplet *sensors_applet) {
                 error = NULL;
                 setup = FALSE;
         }
-
 
 	if (setup) {
                 /* see if setup version matches */
@@ -190,6 +191,7 @@ void sensors_applet_gconf_setup(SensorsApplet *sensors_applet) {
                                 /* previously setup and versions match so use
                                  * old values */
                                 g_debug("GConf data is compatible. Trying to set up sensors from gconf data");
+
                                 if (sensors_applet_gconf_setup_sensors(sensors_applet)) {
                                         g_debug("done setting up from gconf");
                                 } else {

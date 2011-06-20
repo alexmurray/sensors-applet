@@ -1,0 +1,16 @@
+[Applet Factory]
+Id=SensorsAppletFactory
+Location=@LIBEXECDIR@/sensors-applet
+_Name=Sensors Applet Factory
+_Description=Sensors Applet Factory
+
+[SensorsApplet]
+_Name=Hardware Sensors Monitor
+_Description=Displays temperature, fan speed and voltage sensor readings
+Icon=sensors-applet
+BonoboId=OAFIID:GNOME_SensorsApplet
+X-GNOME-Bugzilla-Bugzilla=GNOME
+X-GNOME-Bugzilla-Product=gnome-applets
+X-GNOME-Bugzilla-Component=geyes
+X-GNOME-Bugzilla-Version=@VERSION@
+X-GNOME-Bugzilla-OtherBinaries=sensors-appet

@@ -20,7 +20,7 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include <gnome.h>
+#include <glib/gi18n.h>
 #include "sensor-config-dialog.h"
 #include "sensors-applet.h"
 
@@ -352,6 +352,7 @@ static void sensor_config_dialog_graph_color_set(GtkColorButton *color_button,
 void sensor_config_dialog_create(SensorsApplet *sensors_applet) {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
+	GtkWidget *content_area;
 
         SensorConfigDialog *config_dialog;
 
@@ -395,7 +396,7 @@ void sensor_config_dialog_create(SensorsApplet *sensors_applet) {
 
 	config_dialog->dialog = gtk_dialog_new_with_buttons(header_text,
                                                             GTK_WINDOW(sensors_applet->prefs_dialog->dialog),
-                                                            GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_NO_SEPARATOR,
+                                                            GTK_DIALOG_DESTROY_WITH_PARENT,
                                                             GTK_STOCK_HELP,
                                                             GTK_RESPONSE_HELP,
                                                             GTK_STOCK_CLOSE,
@@ -914,7 +915,9 @@ void sensor_config_dialog_create(SensorsApplet *sensors_applet) {
 				  2, 3,
 				  14, 15);
 
-	gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(config_dialog->dialog)->vbox), GTK_WIDGET(config_dialog->table));
+	content_area = gtk_dialog_get_content_area (GTK_DIALOG(config_dialog->dialog));
+	gtk_box_pack_start(GTK_BOX(content_area), GTK_WIDGET(config_dialog->table),
+		FALSE, FALSE, 0);
 	gtk_widget_show_all(config_dialog->dialog);
 
 }		
