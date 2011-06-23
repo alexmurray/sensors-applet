@@ -75,18 +75,24 @@ static SensorValueRange sensor_value_range(gdouble sensor_value,
 
 static gboolean active_sensor_execute_alarm(ActiveSensor *active_sensor,
                                             NotifType notif_type) {
-        int pid;
+	guint argc;
+	gchar **argv;
+	gboolean ret;
+	GPid pid;
 
         sensors_applet_notify_active_sensor(active_sensor, notif_type);
-        g_debug("EXECUTING %s ALARM: %s", 
-                (notif_type == LOW_ALARM ? 
+        g_debug("EXECUTING %s ALARM: %s",
+                (notif_type == LOW_ALARM ?
                  "LOW" : "HIGH"),
                 active_sensor->alarm_command[notif_type]);
-	pid = gnome_execute_shell(NULL, 
-                                  active_sensor->alarm_command[notif_type]);
+	g_shell_parse_argv(active_sensor->alarm_command[notif_type],
+			   &argc, &argv, NULL);
+	ret = g_spawn_async(NULL, argv, NULL, G_SPAWN_SEARCH_PATH, NULL,
+			    NULL, &pid, NULL);
+	g_strfreev (argv);
         g_debug("Command executed in shell with pid %d", pid);
 
-        return (pid != -1);
+        return ret;
 }
 
 static gboolean active_sensor_execute_low_alarm(ActiveSensor *active_sensor) {
@@ -104,7 +110,7 @@ void active_sensor_alarm_off(ActiveSensor *active_sensor,
 	g_assert(active_sensor);
 
 	if (active_sensor->alarm_timeout_id[notif_type] != -1) {
-		g_debug("Disabling %s alarm.", 
+		g_debug("Disabling %s alarm.",
                         (notif_type == LOW_ALARM ? "LOW" : "HIGH"));
 		if (!g_source_remove(active_sensor->alarm_timeout_id[notif_type])) {
 			g_debug("Error removing alarm source");
@@ -132,7 +138,7 @@ static void active_sensor_alarm_on(ActiveSensor *active_sensor,
 	GtkTreeModel *model;
 	GtkTreePath *tree_path;
 	GtkTreeIter iter;
-        
+
 	g_assert(active_sensor);
 
 	model = gtk_tree_row_reference_get_model(active_sensor->sensor_row);
@@ -141,22 +147,22 @@ static void active_sensor_alarm_on(ActiveSensor *active_sensor,
 	if (gtk_tree_model_get_iter(model, &iter, tree_path)) {
 
 		if (active_sensor->alarm_timeout_id[notif_type] == -1) {
-			/* alarm is not currently on */			
+			/* alarm is not currently on */
 			gtk_tree_model_get(model,
 					   &iter,
-					   (notif_type == LOW_ALARM ? 
+					   (notif_type == LOW_ALARM ?
                                             LOW_ALARM_COMMAND_COLUMN :
-                                            HIGH_ALARM_COMMAND_COLUMN), 
+                                            HIGH_ALARM_COMMAND_COLUMN),
                                            &(active_sensor->alarm_command[notif_type]),
 					   ALARM_TIMEOUT_COLUMN, &(active_sensor->alarm_timeout),
 					   -1);
                         g_debug("Activating alarm to repeat every %d seconds", active_sensor->alarm_timeout);
-                        
+
 			/* execute alarm once, then add to time to
 			   keep repeating it */
 			active_sensor_execute_alarm(active_sensor, notif_type);
-                        int timeout = (active_sensor->alarm_timeout <= 0 ? 
-                                       G_MAXINT : 
+                        int timeout = (active_sensor->alarm_timeout <= 0 ?
+                                       G_MAXINT :
                                        active_sensor->alarm_timeout);
                         switch (notif_type) {
                         case LOW_ALARM:
@@ -172,12 +178,12 @@ static void active_sensor_alarm_on(ActiveSensor *active_sensor,
                         default:
                                 g_debug("Unkown notif type: %d", notif_type);
                         }
-                        
-                        
+
+
                 }
 	}
 	gtk_tree_path_free(tree_path);
-        
+
 }
 
 /**
@@ -202,8 +208,8 @@ gint active_sensor_compare(ActiveSensor *a, ActiveSensor *b) {
 	return ret_val;
 }
 
-static void active_sensor_update_icon(ActiveSensor *active_sensor, 
-                                      GdkPixbuf *base_icon, 
+static void active_sensor_update_icon(ActiveSensor *active_sensor,
+                                      GdkPixbuf *base_icon,
                                       SensorType sensor_type) {
 
 	GdkPixbuf *overlay_icon, *new_icon;
@@ -221,7 +227,7 @@ static void active_sensor_update_icon(ActiveSensor *active_sensor,
 
         if (sensor_type == TEMP_SENSOR) {
                 overlay_icon_filename = temp_overlay_icons[value_range];
-        } 
+        }
 
 	/* load base icon */
 	new_icon = gdk_pixbuf_copy(base_icon);
@@ -229,7 +235,7 @@ static void active_sensor_update_icon(ActiveSensor *active_sensor,
 	/* only load overlay if required */
 	if (overlay_icon_filename) {
 		overlay_icon = gdk_pixbuf_new_from_file_at_size(overlay_icon_filename,
-								DEFAULT_ICON_SIZE, 
+								DEFAULT_ICON_SIZE,
 								DEFAULT_ICON_SIZE,
 								NULL);
 		if (overlay_icon) {
@@ -240,14 +246,14 @@ static void active_sensor_update_icon(ActiveSensor *active_sensor,
 					     1.0, 1.0,
 					     GDK_INTERP_BILINEAR,
 					     255);
-			
+
 			g_object_unref(overlay_icon);
 		}
 	}
         gtk_image_set_from_pixbuf(GTK_IMAGE(active_sensor->icon),
                                   new_icon);
 	g_object_unref(new_icon);
-	
+
 }
 
 static void active_sensor_update_graph(ActiveSensor *as) {
@@ -289,7 +295,7 @@ static void active_sensor_update_graph(ActiveSensor *as) {
                 /* use black for bg color of graphs */
                 cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
                 cairo_fill(cr);
-                
+
 
                 /* determine height to scale line at for each value -
                  * only do as many as will fit or the number of
@@ -303,14 +309,14 @@ static void active_sensor_update_graph(ActiveSensor *as) {
                         line_height = sensor_value_range_normalised(as->sensor_values[i],
                                                                     as->sensor_low_value,
                                                                     as->sensor_high_value) * height;
-                        
-                        
-                        
-                        if (line_height > 0) { 
+
+
+
+                        if (line_height > 0) {
                                 cairo_move_to(cr,
-                                              x, 
+                                              x,
                                               y);
-                                cairo_line_to(cr, x, 
+                                cairo_line_to(cr, x,
                                               y - line_height);
                         }
 
@@ -322,14 +328,14 @@ static void active_sensor_update_graph(ActiveSensor *as) {
                                                       x, 0);
                 cairo_pattern_add_color_stop_rgb(pattern,
                                                  0,
-                                                 as->graph_color.red / 65535.0 - CAIRO_GRAPH_COLOR_GRADIENT, 
-                                                 as->graph_color.green / 65535.0 - CAIRO_GRAPH_COLOR_GRADIENT, 
+                                                 as->graph_color.red / 65535.0 - CAIRO_GRAPH_COLOR_GRADIENT,
+                                                 as->graph_color.green / 65535.0 - CAIRO_GRAPH_COLOR_GRADIENT,
                                                  as->graph_color.blue / 65535.0 - CAIRO_GRAPH_COLOR_GRADIENT);
 
                 cairo_pattern_add_color_stop_rgb(pattern,
                                                  height,
-                                                 as->graph_color.red / 65535.0 + CAIRO_GRAPH_COLOR_GRADIENT, 
-                                                 as->graph_color.green / 65535.0 + CAIRO_GRAPH_COLOR_GRADIENT, 
+                                                 as->graph_color.red / 65535.0 + CAIRO_GRAPH_COLOR_GRADIENT,
+                                                 as->graph_color.green / 65535.0 + CAIRO_GRAPH_COLOR_GRADIENT,
                                                  as->graph_color.blue / 65535.0 + CAIRO_GRAPH_COLOR_GRADIENT);
 
                 cairo_set_source(cr, pattern);
@@ -408,7 +414,7 @@ static void active_sensor_set_graph_dimensions(ActiveSensor *as,
         if (as->sensor_values) {
                 old_values = as->sensor_values;
                 old_num_samples = as->num_samples;
-                
+
                 as->num_samples = num_samples;
                 as->sensor_values = g_malloc0(sizeof(gdouble)*as->num_samples);
                 memcpy(as->sensor_values,
@@ -419,11 +425,11 @@ static void active_sensor_set_graph_dimensions(ActiveSensor *as,
         } else {
                 as->sensor_values = g_malloc0(sizeof(gdouble)*num_samples);
                 as->num_samples = num_samples;
-        }                
+        }
 
         /* update graph frame size request */
         gtk_widget_set_size_request(as->graph,
-                                    graph_width, 
+                                    graph_width,
                                     graph_height);
 }
 
@@ -470,7 +476,7 @@ ActiveSensor *active_sensor_new(SensorsApplet *sensors_applet,
 
         /* need to set size according to orientation */
         orient = panel_applet_get_orient(active_sensor->sensors_applet->applet);
-        graph_size = panel_applet_gconf_get_int(active_sensor->sensors_applet->applet, 
+        graph_size = panel_applet_gconf_get_int(active_sensor->sensors_applet->applet,
                                                 GRAPH_SIZE, NULL);
 
         horizontal = ((orient == PANEL_APPLET_ORIENT_UP) ||
@@ -498,11 +504,11 @@ static void active_sensor_update_sensor_value(ActiveSensor *as,
                         as->sensor_values,
                         (as->num_samples - 1)*sizeof(gdouble));
         }
-        
+
         as->sensor_values[0] = sensor_value;
 }
 
-void active_sensor_update(ActiveSensor *active_sensor, 
+void active_sensor_update(ActiveSensor *active_sensor,
                           SensorsApplet *sensors_applet) {
 
         GtkTreeModel *model;
@@ -552,7 +558,7 @@ void active_sensor_update(ActiveSensor *active_sensor,
 	/* if can successfully get iter can proceed */
 	if (gtk_tree_model_get_iter(model, &iter, path)) {
 		gtk_tree_path_free(path);
-		gtk_tree_model_get(GTK_TREE_MODEL(sensors_applet->sensors), 
+		gtk_tree_model_get(GTK_TREE_MODEL(sensors_applet->sensors),
 				   &iter,
 				   PATH_COLUMN, &sensor_path,
 				   ID_COLUMN, &sensor_id,
@@ -568,7 +574,7 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                    ICON_PIXBUF_COLUMN, &icon_pixbuf,
                                    GRAPH_COLOR_COLUMN, &graph_color,
 				   -1);
-			
+
 
                 SensorsAppletPluginGetSensorValue get_sensor_value;
 		/* only call function if is in hash table for plugin */
@@ -577,13 +583,13 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                                         sensor_id,
                                                         sensor_type,
                                                         &error);
-				
+
 
                         if (error) {
                                 g_debug("Error updating active sensor: %s", error->message);
-                                sensors_applet_notify_active_sensor(active_sensor, 
+                                sensors_applet_notify_active_sensor(active_sensor,
                                                                     SENSOR_INTERFACE_ERROR);
-                                
+
                                 /* hard code text as ERROR */
 				value_text = g_strdup(_("ERROR"));
                                 value_tooltip = g_strdup_printf("- %s", error->message);
@@ -593,7 +599,7 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                 /* set sensor value to an error code -
                                  * note this is not unique */
                                 sensor_value = -1;
-			} else { 
+			} else {
                                 /* use hidden gconf key for hide_units */
 
                                 if ((client = gconf_client_get_default()) != NULL) {
@@ -606,7 +612,7 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                                 g_error_free(error);
                                                 error = NULL;
                                         }
-                                        
+
                                         g_object_unref(client);
                                 }
 
@@ -617,10 +623,10 @@ void active_sensor_update(ActiveSensor *active_sensor,
 
                                         scale = (TemperatureScale)panel_applet_gconf_get_int(sensors_applet->applet, TEMPERATURE_SCALE, NULL);
                                         /* scale value */
-					sensor_value = sensors_applet_convert_temperature(sensor_value, 
+					sensor_value = sensors_applet_convert_temperature(sensor_value,
                                                                                           CELSIUS,
-                                                                                          scale); 
-                                        
+                                                                                          scale);
+
                                         sensor_value = (sensor_value * sensor_multiplier) + sensor_offset;
                                         switch (scale) {
                                         case FAHRENHEIT:
@@ -629,7 +635,7 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                                  * always display
                                                  * units */
                                                 value_tooltip = g_strdup_printf("%2.0f %s", sensor_value, UNITS_FAHRENHEIT);
-                                                
+
                                                 break;
                                         case CELSIUS:
                                                 value_text = g_strdup_printf("%2.0f %s", sensor_value, (hide_units ? "" : UNITS_CELSIUS));
@@ -641,27 +647,27 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                                 break;
                                         }
                                         break;
-				
+
                                 case FAN_SENSOR:
                                         sensor_value = (sensor_value * sensor_multiplier) + sensor_offset;
                                         value_text = g_strdup_printf("%4.0f %s", sensor_value, (hide_units ? "" : UNITS_RPM));
                                         value_tooltip = g_strdup_printf("%4.0f %s", sensor_value, UNITS_RPM);
 
 					break;
-                                        
+
 				case VOLTAGE_SENSOR:
 					sensor_value = (sensor_value * sensor_multiplier) + sensor_offset;
 					value_text = g_strdup_printf("%4.2f %s", sensor_value, (hide_units ? "" : UNITS_VOLTAGE));
 					value_tooltip = g_strdup_printf("%4.2f %s", sensor_value, UNITS_VOLTAGE);
 
 					break;
-				
+
 				case CURRENT_SENSOR:
 					sensor_value = (sensor_value * sensor_multiplier) + sensor_offset;
 					value_text = g_strdup_printf("%4.2f %s", sensor_value, (hide_units ? "" : UNITS_CURRENT));
 					value_tooltip = g_strdup_printf("%4.2f %s", sensor_value, UNITS_CURRENT);
 					break;
-				
+
                                 } /* end switch(sensor_type) */
                         } /* end else on error */
                         /* setup for tooltips */
@@ -672,7 +678,7 @@ void active_sensor_update(ActiveSensor *active_sensor,
                         display_mode = panel_applet_gconf_get_int(sensors_applet->applet,
                                                                   DISPLAY_MODE,
                                                                   NULL);
-                        
+
                         /* most users wont have a font size set */
                         if ((client = gconf_client_get_default()) != NULL) {
                                 font_size = gconf_client_get_int(client,
@@ -684,7 +690,7 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                         g_error_free(error);
                                         error = NULL;
                                 }
-                                
+
                                 g_object_unref(client);
                         }
                         /* do icon if needed */
@@ -696,9 +702,9 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                         active_sensor_update_sensor_value(active_sensor,
                                                                           sensor_value);
                                         active_sensor->sensor_low_value = sensor_low_value;
-                                        active_sensor->sensor_high_value = sensor_high_value;                                
+                                        active_sensor->sensor_high_value = sensor_high_value;
                                         active_sensor_update_icon(active_sensor, icon_pixbuf, sensor_type);
-                                } 
+                                }
                                 /* always update tooltip */
                                 gtk_widget_set_tooltip_text(active_sensor->icon,
                                                             tooltip);
@@ -712,15 +718,15 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                 /* update graph color in case has changed */
                                 gdk_color_parse(graph_color,
                                                 &(active_sensor->graph_color));
-                                
+
                                 active_sensor_update_graph(active_sensor);
                                 gtk_widget_set_tooltip_text(active_sensor->graph,
                                                             tooltip);
-                                
+
                         }
                         old_value_text = value_text;
                         if (sensor_alarm_enabled) {
-                                if (sensor_value >= sensor_high_value || 
+                                if (sensor_value >= sensor_high_value ||
                                     sensor_value <= sensor_low_value) {
                                         /* make value text red and
                                          * activate alarm */
@@ -728,7 +734,7 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                             display_mode == DISPLAY_ICON_WITH_VALUE ||
                                             display_mode == DISPLAY_VALUE) {
                                                 value_text = g_markup_printf_escaped("<span foreground=\"#FF0000\">%s</span>", old_value_text);
-                                                
+
                                                 g_free(old_value_text);
                                         }
                                         /* could have both coditions at once */
@@ -739,16 +745,16 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                         if (sensor_value <= sensor_low_value) {
                                                 active_sensor_alarm_on(active_sensor, LOW_ALARM);
                                         }
-                                        
+
                                 } else {
                                         /* make sure alarms are off */
                                         active_sensor_all_alarms_off(active_sensor);
-                                }				
+                                }
                         } else { /* else for if alarm enabled */
                                 /* make sure all alarms are off */
                                 active_sensor_all_alarms_off(active_sensor);
                         }
-			
+
                         /* do value label */
                         if (display_mode == DISPLAY_LABEL_WITH_VALUE ||
                             display_mode == DISPLAY_ICON_WITH_VALUE ||
@@ -761,8 +767,8 @@ void active_sensor_update(ActiveSensor *active_sensor,
                                 }
                                 gtk_label_set_markup(GTK_LABEL(active_sensor->value),
                                                      value_text);
-                        
-			
+
+
                                 gtk_widget_set_tooltip_text(active_sensor->value,
                                                             tooltip);
                         }
@@ -793,10 +799,10 @@ void active_sensor_update(ActiveSensor *active_sensor,
         	g_free(sensor_interface);
 	        g_free(graph_color);
 		g_object_unref(icon_pixbuf);
-		
+
 	} else {
 		g_debug("Error getting iter when updating sensor...");
-		
+
 	}
         active_sensor->updated = TRUE;
 
@@ -807,11 +813,11 @@ void active_sensor_update(ActiveSensor *active_sensor,
  * ActiveSensor */
 void active_sensor_icon_changed(ActiveSensor *active_sensor,
 				SensorsApplet *sensors_applet) {
-	
+
 	GtkTreeModel *model;
 	GtkTreePath *path;
 	GtkTreeIter iter;
-	
+
 	SensorType sensor_type;
         GdkPixbuf *icon_pixbuf;
 
