@@ -265,7 +265,6 @@ static void active_sensor_update_graph(ActiveSensor *as) {
         gint i;
         cairo_surface_t *surface;
 	GtkAllocation alloc;
-	GtkStyle *style;
 
 	gtk_widget_get_allocation(as->graph, &alloc);
 	width = alloc.width;
@@ -274,13 +273,15 @@ static void active_sensor_update_graph(ActiveSensor *as) {
         /* only do if drawable - will not be drawable if not currently
          * displayed on screen */
         if (gtk_widget_get_window(as->graph)) {
-	//&& GDK_IS_DRAWABLE(gtk_widget_get_window(as->graph))) {
-		surface = gdk_window_create_similar_surface (
+		if (as->surface)
+			cairo_surface_destroy(as->surface);
+		as->surface = gdk_window_create_similar_surface (
 				gtk_widget_get_window (as->graph),
 				CAIRO_CONTENT_COLOR_ALPHA,
 				width, height);
+		gtk_widget_queue_resize (as->graph);
 
-                cr = cairo_create(surface);
+                cr = cairo_create(as->surface);
 
                 /* so we can set a clipping area, as well as fill the
                  * back of the graph black */
@@ -296,7 +297,6 @@ static void active_sensor_update_graph(ActiveSensor *as) {
                 cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
                 cairo_fill(cr);
 
-
                 /* determine height to scale line at for each value -
                  * only do as many as will fit or the number of
                  * samples that we have */
@@ -309,8 +309,6 @@ static void active_sensor_update_graph(ActiveSensor *as) {
                         line_height = sensor_value_range_normalised(as->sensor_values[i],
                                                                     as->sensor_low_value,
                                                                     as->sensor_high_value) * height;
-
-
 
                         if (line_height > 0) {
                                 cairo_move_to(cr,
@@ -341,22 +339,7 @@ static void active_sensor_update_graph(ActiveSensor *as) {
                 cairo_set_source(cr, pattern);
                 cairo_stroke(cr);
                 cairo_pattern_destroy(pattern);
-                cairo_destroy(cr);
-
-		style = gtk_widget_get_style (GTK_WIDGET (as->graph));
-
-                /* now draw pixmap onto drawable surface */
-/*                gdk_draw_drawable(gtk_widget_get_window(as->graph),
-				  &style->fg[GTK_STATE_NORMAL],
-                                  pixmap,
-                                  0, 0,
-                                  0, 0,
-                                  -1, -1);*
-                /* don't need pixmap anymore */
-/*                g_object_unref(pixmap);*/
-
-		cairo_set_source_surface (cr, surface, x, y);
-		cairo_paint (cr);
+	        cairo_destroy (cr);
         }
 }
 
@@ -382,16 +365,18 @@ void active_sensor_destroy(ActiveSensor *active_sensor) {
         g_free(active_sensor);
 }
 
+static gboolean
+graph_applet_draw (GtkWidget  *widget,
+                  cairo_t    *cr,
+                  ActiveSensor *as)
+{
+        g_return_val_if_fail (as->surface != NULL, FALSE);
 
-gboolean graph_expose_event_cb(GtkWidget *graph,
-                               GdkEventExpose *event,
-                               gpointer data) {
-        ActiveSensor *as;
+        cairo_save (cr);
+        cairo_set_source_surface (cr, as->surface, 0, 0);
+        cairo_paint (cr);
+        cairo_restore (cr);
 
-        as = (ActiveSensor *)data;
-
-        active_sensor_update_graph(as);
-        /* propagate event onwards */
         return FALSE;
 }
 
@@ -487,8 +472,8 @@ ActiveSensor *active_sensor_new(SensorsApplet *sensors_applet,
                                            (horizontal ? sensors_applet->size : graph_size));
 
         g_signal_connect(G_OBJECT(active_sensor->graph),
-                         "expose_event",
-                         G_CALLBACK(graph_expose_event_cb),
+                         "draw",
+                         G_CALLBACK(graph_applet_draw),
                          active_sensor);
 
         active_sensor->updated = FALSE;

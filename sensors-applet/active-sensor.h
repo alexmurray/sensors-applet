@@ -59,6 +59,7 @@ struct _ActiveSensor {
         
 	gdouble sensor_low_value;
 	gdouble sensor_high_value;	
+	cairo_surface_t *surface;
 };
 
 ActiveSensor *active_sensor_new(SensorsApplet *sensors_applet,
