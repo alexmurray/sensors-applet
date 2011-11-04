@@ -29,7 +29,8 @@ org.gnome.panel.applet.SensorsAppletFactory.service: $(service_in_files)
 CLEANFILES = $(applet_DATA) $(applet_DATA).in $(service_DATA) $(schemas_DATA)
 
 EXTRA_DIST 	= $(ui_DATA) \
-		  $(server_DATA:.server=.server.in.in) \
+		  $(applet_in_files:.panel-applet.in=.panel-applet.in.in) \
+		  $(service_in_files) \
 		  intltool-merge.in intltool-extract.in intltool-update.in \
 		  gnome-doc-utils.make
 

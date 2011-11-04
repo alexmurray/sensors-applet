@@ -1,5 +1,3 @@
-SensorsApplet.server.in.in
-SensorsApplet.xml
 plugins/pmu-sys/pmu-sys-plugin.c
 plugins/i2c-sys/i2c-sys-plugin.c
 plugins/i8k/i8k-plugin.c
