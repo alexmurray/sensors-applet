@@ -30,6 +30,7 @@
 
 static const gchar * const compatible_versions[] = {
         PACKAGE_VERSION, /* always list current version */
+        "2.2.7",
         "2.2.6",
         "2.2.5",
 	"2.2.4",
@@ -52,7 +53,7 @@ static const gchar * const error_titles[] = {
 static const gchar * const error_messages[] = {
         N_("An error has occurred when loading the stored sensors data. "
            "The default values will be used to recover from this error."),
-        
+
         N_("Unfortunately the previous configuration for GNOME Sensors Applet "
            "is not compatible with this version. The existing sensors data "
            "will be overwritten with the default values for this new version.")
@@ -130,8 +131,8 @@ void sensors_applet_gconf_setup(SensorsApplet *sensors_applet) {
                                            "num_samples",
                                            0,
                                            NULL);
-                
-        }                                      
+
+        }
 
         /* convert old alarm_commands to high and low if exist */
         GSList *alarm_commands;
@@ -139,9 +140,9 @@ void sensors_applet_gconf_setup(SensorsApplet *sensors_applet) {
                                                           "alarm_commands",
                                                           GCONF_VALUE_STRING,
                                                           NULL))) {
-                
+
                 g_debug("Converting old alarm commands to new high and low commands");
-                
+
                 panel_applet_gconf_set_list(sensors_applet->applet,
                                             LOW_ALARM_COMMANDS,
                                             GCONF_VALUE_STRING,
@@ -160,7 +161,7 @@ void sensors_applet_gconf_setup(SensorsApplet *sensors_applet) {
                                             NULL);
                 g_slist_foreach(alarm_commands, (GFunc)g_free, NULL);
                 g_slist_free(alarm_commands);
-                
+
         }
 
         setup = panel_applet_gconf_get_bool(sensors_applet->applet,
@@ -185,7 +186,7 @@ void sensors_applet_gconf_setup(SensorsApplet *sensors_applet) {
                         error = NULL;
                         old_version = NULL;
                 }
-                
+
                 if (old_version) {
                         if (sensors_applet_gconf_is_compatible(old_version)) {
                                 /* previously setup and versions match so use
@@ -202,17 +203,17 @@ void sensors_applet_gconf_setup(SensorsApplet *sensors_applet) {
 
                                 return;
 
-                                        
+
                         }
                         g_free(old_version);
 
                 }
                 sensors_applet_notify(sensors_applet, GCONF_READ_ERROR);
-                
-                        
+
+
                 sensors_applet_gconf_error_occurred(SENSORS_APPLET_VERSION_ERROR);
         }
-        
+
         /* use defaults */
         g_debug("Setting gconf defaults only");
         sensors_applet_gconf_set_defaults(sensors_applet);
@@ -223,17 +224,17 @@ enum {
         IDS_INDEX,
         LABELS_INDEX,
         INTERFACES_INDEX,
-        SENSOR_TYPES_INDEX, 
-        ENABLES_INDEX, 
-        LOW_VALUES_INDEX, 
-        HIGH_VALUES_INDEX, 
-        ALARM_ENABLES_INDEX, 
-        LOW_ALARM_COMMANDS_INDEX, 
+        SENSOR_TYPES_INDEX,
+        ENABLES_INDEX,
+        LOW_VALUES_INDEX,
+        HIGH_VALUES_INDEX,
+        ALARM_ENABLES_INDEX,
+        LOW_ALARM_COMMANDS_INDEX,
         HIGH_ALARM_COMMANDS_INDEX,
-        ALARM_TIMEOUTS_INDEX, 
+        ALARM_TIMEOUTS_INDEX,
         MULTIPLIERS_INDEX,
         OFFSETS_INDEX,
-        ICON_TYPES_INDEX, 
+        ICON_TYPES_INDEX,
         GRAPH_COLORS_INDEX,
         NUM_KEYS
 };
@@ -243,17 +244,17 @@ const gchar * const keys[NUM_KEYS] = {
         IDS,
         LABELS,
         INTERFACES,
-        SENSOR_TYPES, 
-        ENABLES, 
-        LOW_VALUES, 
-        HIGH_VALUES, 
-        ALARM_ENABLES, 
+        SENSOR_TYPES,
+        ENABLES,
+        LOW_VALUES,
+        HIGH_VALUES,
+        ALARM_ENABLES,
         LOW_ALARM_COMMANDS,
         HIGH_ALARM_COMMANDS,
-        ALARM_TIMEOUTS, 
+        ALARM_TIMEOUTS,
         MULTIPLIERS,
         OFFSETS,
-        ICON_TYPES, 
+        ICON_TYPES,
         GRAPH_COLORS,
 };
 
@@ -319,20 +320,20 @@ gboolean sensors_applet_gconf_setup_sensors(SensorsApplet *sensors_applet) {
 	   we set to -1, and visible which we set to false for all
 	   parent nodes and true for all child nodes */
         int i;
-        GSList *lists[NUM_KEYS] = {NULL}; 
+        GSList *lists[NUM_KEYS] = {NULL};
 
-	GSList *current[NUM_KEYS] = {NULL}; 
+	GSList *current[NUM_KEYS] = {NULL};
 
 	GError *error = NULL;
 
         for (i = 0; i < NUM_KEYS; i++) {
-                lists[i] = panel_applet_gconf_get_list(sensors_applet->applet, 
-                                                       keys[i], 
-                                                       key_types[i], 
+                lists[i] = panel_applet_gconf_get_list(sensors_applet->applet,
+                                                       keys[i],
+                                                       key_types[i],
                                                        &error);
                 if (error || NULL == lists[i]) {
                         sensors_applet_notify(sensors_applet, GCONF_READ_ERROR);
-                
+
                         sensors_applet_gconf_error_occurred(SENSORS_APPLET_GCONF_ERROR);
                         if (error) {
                                 g_error_free(error);
@@ -354,8 +355,8 @@ gboolean sensors_applet_gconf_setup_sensors(SensorsApplet *sensors_applet) {
                 /* need to ensure correct order */
 		sensors_applet_add_sensor(sensors_applet,
                                           (gchar *)(current[PATHS_INDEX]->data),
-                                          (gchar *)(current[IDS_INDEX]->data), 
-                                          (gchar *)(current[LABELS_INDEX]->data), 
+                                          (gchar *)(current[IDS_INDEX]->data),
+                                          (gchar *)(current[LABELS_INDEX]->data),
                                           (gchar *)(current[INTERFACES_INDEX]->data),
                                           GPOINTER_TO_UINT(current[SENSOR_TYPES_INDEX]->data),
                                           GPOINTER_TO_INT(current[ENABLES_INDEX]->data),
@@ -369,9 +370,9 @@ gboolean sensors_applet_gconf_setup_sensors(SensorsApplet *sensors_applet) {
                                           (gdouble)(GPOINTER_TO_INT(current[OFFSETS_INDEX]->data) / 1000.0),
                                           (SensorType)GPOINTER_TO_UINT(current[ICON_TYPES_INDEX]->data),
                                           (gchar *)(current[GRAPH_COLORS_INDEX]->data)
-                                          
+
                         );
-                
+
 	}
         sensors_applet_gconf_free_lists(lists,
                                         NUM_KEYS);
@@ -393,33 +394,33 @@ gboolean sensors_applet_gconf_save_sensors(SensorsApplet *sensors_applet) {
         GSList *lists[NUM_KEYS] = {NULL};
         int i;
         gchar *current_path, *current_id, *current_label, *current_interface,
-                *current_low_alarm_command, *current_high_alarm_command, 
+                *current_low_alarm_command, *current_high_alarm_command,
                 *current_graph_color;
         gboolean current_enable, current_alarm_enable;
-	gdouble current_low_value, current_high_value, current_multiplier, 
+	gdouble current_low_value, current_high_value, current_multiplier,
                 current_offset;
-	guint current_alarm_timeout, current_sensor_type, 
+	guint current_alarm_timeout, current_sensor_type,
                 current_icon_type;
-	
+
 	GError *error = NULL;
 
 	/* now step through the GtkTreeStore sensors to
 	   find which sensors are enabled */
 	for (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(sensors_applet->sensors), &interfaces_iter); not_end_of_interfaces; not_end_of_interfaces = gtk_tree_model_iter_next(GTK_TREE_MODEL(sensors_applet->sensors), &interfaces_iter)) {
 		// store a gconf key for this interface
-		gtk_tree_model_get(GTK_TREE_MODEL(sensors_applet->sensors), 
+		gtk_tree_model_get(GTK_TREE_MODEL(sensors_applet->sensors),
 				   &interfaces_iter,
 				   ID_COLUMN, &current_id,
 				   -1);
 
 		panel_applet_gconf_set_bool(sensors_applet->applet, current_id, TRUE, NULL);
 		g_free(current_id);
-		
+
 		/* reset sensors sentinel */
 		not_end_of_sensors = TRUE;
-		
+
 		for (gtk_tree_model_iter_children(GTK_TREE_MODEL(sensors_applet->sensors), &sensors_iter, &interfaces_iter); not_end_of_sensors; not_end_of_sensors = gtk_tree_model_iter_next(GTK_TREE_MODEL(sensors_applet->sensors), &sensors_iter)) {
-			gtk_tree_model_get(GTK_TREE_MODEL(sensors_applet->sensors), 
+			gtk_tree_model_get(GTK_TREE_MODEL(sensors_applet->sensors),
 					   &sensors_iter,
 					   PATH_COLUMN, &current_path,
 					   ID_COLUMN, &current_id,
@@ -464,21 +465,21 @@ gboolean sensors_applet_gconf_save_sensors(SensorsApplet *sensors_applet) {
         for (i = 0; i < NUM_KEYS; i++) {
                 if (lists[i] != NULL) {
                         lists[i] = g_slist_reverse(lists[i]);
-                        
-                        panel_applet_gconf_set_list(sensors_applet->applet, 
-                                                    keys[i], 
+
+                        panel_applet_gconf_set_list(sensors_applet->applet,
+                                                    keys[i],
                                                     key_types[i],
                                                     lists[i], &error);
                         if (error) {
                                 sensors_applet_notify(sensors_applet, GCONF_WRITE_ERROR);
-                
+
                                 g_error_free(error);
                                 return FALSE;
                         }
                 } else {
                         g_debug("list %s is NULL", keys[i]);
                 }
-                        
+
         }
 
 	sensors_applet_gconf_free_lists(lists,
@@ -491,4 +492,3 @@ gboolean sensors_applet_gconf_save_sensors(SensorsApplet *sensors_applet) {
 
 	return TRUE;
 }
-
