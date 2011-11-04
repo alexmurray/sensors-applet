@@ -29,11 +29,11 @@ typedef struct {
         SensorsApplet *sensors_applet;
         GtkDialog *dialog;
         GtkNotebook *notebook;
-        
+
         /* widgets for global prefs */
         GtkSpinButton *timeout_spinbutton, *graph_size_spinbutton;
         GtkTable *globals_table;
-        GtkHSeparator *globals_separator;
+        GtkSeparator *globals_separator;
         GtkComboBox *display_mode_combo_box, *layout_mode_combo_box, *temperature_scale_combo_box;
         GtkLabel *timeout_label, *display_mode_label, *layout_mode_label, *temperature_scale_label, *graph_size_label, *update_header, *display_header;
         GtkAdjustment *timeout_adjust, *graph_size_adjust;
@@ -42,14 +42,14 @@ typedef struct {
         GtkCheckButton *display_notifications;
         GtkLabel *notifications_header;
 #endif
-        
+
         /* widgets for sensors tree */
-        GtkTreeView *view; 
+        GtkTreeView *view;
         GtkTreeViewColumn *id_column, *label_column, *enable_column, *icon_column;
         GtkCellRenderer *id_renderer, *label_renderer, *enable_renderer, *icon_renderer;
         GtkScrolledWindow *scrolled_window;
-        
-        GtkVButtonBox *buttons_box; /* holds sensor reorder buttons */
+
+        GtkButtonBox *buttons_box; /* holds sensor reorder buttons */
         GtkBox *sensors_hbox; /* holds scrolled window and
                                * buttons_vbox */
         GtkAlignment *globals_alignment;
@@ -57,7 +57,7 @@ typedef struct {
         GtkBox *sensor_config_hbox; /* holds config button */
         GtkSizeGroup *size_group; /* so comboboxes all
 				   * request the same size */
-        
+
         GtkButton *sensor_up_button;
         GtkButton *sensor_down_button;
         GtkButton *sensor_config_button;
