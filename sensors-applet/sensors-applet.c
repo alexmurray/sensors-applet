@@ -121,70 +121,6 @@ static void destroy_cb(GtkWidget *widget, gpointer data) {
 	return;
 }
 
-static gboolean
-matrix_is_identity (cairo_matrix_t *matrix)
-{
-	return matrix->xx == 1.0 && matrix->yy == 1.0 &&
-		matrix->yx == 0.0 && matrix->xy == 0.0 &&
-		matrix->x0 == 0.0 && matrix->y0 == 0.0;
-}
-
-
-static void change_background_cb(PanelApplet *applet,
-				cairo_pattern_t *pattern,
-				gpointer *data) {
-	GtkRcStyle *rc_style;
-	GtkStyle *style;
-
-	/* reset style */
-	gtk_widget_set_style(GTK_WIDGET(applet), NULL);
-	rc_style = gtk_rc_style_new();
-	gtk_widget_modify_style(GTK_WIDGET(applet), rc_style);
-	g_object_unref(rc_style);
-
-	if (pattern == NULL) {
-		return;
-	}
-
-	switch (cairo_pattern_get_type (pattern)) {
-		case CAIRO_PATTERN_TYPE_SOLID: {
-			double r, b, g, a;
-			GdkColor color;
-
-			cairo_pattern_get_rgba (pattern, &r, &g, &b, &a);
-			color.pixel = 0;
-			color.red = r * 65535.;
-			color.green = g * 65535.;
-			color.blue = b * 65535.;
-			gtk_widget_modify_bg (GTK_WIDGET(applet), GTK_STATE_NORMAL, &color);
-			break;
-		}
-		case CAIRO_PATTERN_TYPE_SURFACE: {
-			cairo_surface_t *surface;
-			cairo_matrix_t matrix;
-			GdkWindow *window;
-
-			window = gtk_widget_get_window (GTK_WIDGET(applet));
-			cairo_pattern_get_matrix (pattern, &matrix);
-			if (cairo_pattern_get_surface (pattern, &surface) == CAIRO_STATUS_SUCCESS &&
-				matrix_is_identity (&matrix) &&
-				cairo_surface_get_type (surface) == CAIRO_SURFACE_TYPE_XLIB &&
-				cairo_xlib_surface_get_visual (surface) == GDK_VISUAL_XVISUAL (gdk_window_get_visual ((window))) &&
-				cairo_xlib_surface_get_display (surface) == GDK_WINDOW_XDISPLAY (window)) {
-				style = gtk_style_copy (gtk_widget_get_style (GTK_WIDGET(applet)));
-				if (style->background[GTK_STATE_NORMAL])
-				cairo_pattern_destroy (style->background[GTK_STATE_NORMAL]);
-				style->background[GTK_STATE_NORMAL] = cairo_pattern_reference (pattern);
-				gtk_widget_set_style (GTK_WIDGET(applet), style);
-				g_object_unref (style);
-			}
-			break;
-		}
-	default:
-		break;
-	}
-}
-
 static void change_orient_cb (PanelApplet *applet, 
                               PanelAppletOrient orient, 
                               gpointer data) {
@@ -1406,6 +1342,10 @@ void sensors_applet_init(SensorsApplet *sensors_applet) {
         g_assert(sensors_applet);
 	g_assert(sensors_applet->applet);
 
+	/* Have our background automatically painted. */
+	panel_applet_set_background_widget(PANEL_APPLET(sensors_applet->applet),
+		GTK_WIDGET(sensors_applet->applet));
+
         /* plugin functions are stored as name -> get_value_function pairs so
          * use standard string functions on hash table */
         sensors_applet->plugins = g_hash_table_new(g_str_hash,
@@ -1457,10 +1397,6 @@ void sensors_applet_init(SensorsApplet *sensors_applet) {
 
 	g_signal_connect(sensors_applet->applet, "style-set",
 			 G_CALLBACK(style_set_cb),
-			 sensors_applet);
-
-	g_signal_connect(sensors_applet->applet, "change_background",
-			 G_CALLBACK(change_background_cb), 
 			 sensors_applet);
 
         g_signal_connect(G_OBJECT(sensors_applet->applet), "change_orient",
