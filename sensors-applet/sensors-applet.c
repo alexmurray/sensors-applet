@@ -49,7 +49,7 @@
                                 * sensors_applet->size to ensure a
                                 * real value is stored */
 #define COLUMN_SPACING 2
-#define ROW_SPACING 0
+#define ROW_SPACING 1
 
 /* callbacks for panel menu */
 static void prefs_cb(GtkAction *action,
@@ -531,9 +531,9 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
 
                 if (sensors_applet->table == NULL) {
                         /* only need 1 row and 1 col */
-                        sensors_applet->table = gtk_table_new(1, 1, FALSE);
-                        gtk_table_set_col_spacings(GTK_TABLE(sensors_applet->table), COLUMN_SPACING);
-                        gtk_table_set_row_spacings(GTK_TABLE(sensors_applet->table), ROW_SPACING);
+                        sensors_applet->table = gtk_grid_new();
+                        gtk_grid_set_column_spacing(GTK_GRID(sensors_applet->table), COLUMN_SPACING);
+                        gtk_grid_set_row_spacing(GTK_GRID(sensors_applet->table), ROW_SPACING);
                         /* add table to applet */
                         gtk_container_add(GTK_CONTAINER(sensors_applet->applet), sensors_applet->table);
                         
@@ -545,15 +545,18 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
                         gtk_container_foreach(GTK_CONTAINER(sensors_applet->table),
                                               (GtkCallback)gtk_widget_destroy,
                                               NULL);
-                        /* make sure only 1x1 table */
-                        gtk_table_resize(GTK_TABLE(sensors_applet->table),
-                                         1, 1);
                 }
                 g_debug("packing no sensors enabled label");
-                gtk_table_attach_defaults(GTK_TABLE(sensors_applet->table),
+                gtk_grid_attach(GTK_GRID(sensors_applet->table),
                                           GTK_WIDGET(no_sensors_enabled_label),
-                                          0, 1,
-                                          0, 1);
+                                          0, 0,
+                                          1, 1);
+		g_object_set (G_OBJECT (sensors_applet->table),
+				"halign", GTK_ALIGN_FILL,
+				"valign", GTK_ALIGN_FILL,
+				"vexpand", TRUE,
+				"hexpand", TRUE,
+				NULL);
                 gtk_widget_show_all(GTK_WIDGET(sensors_applet->applet));
                 return;
                 
@@ -579,8 +582,8 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
 
         switch (display_mode) {
         case DISPLAY_VALUE:
-                gtk_widget_size_request(GTK_WIDGET(first_sensor->value),
-                                        &req);
+                gtk_widget_get_preferred_size(GTK_WIDGET(first_sensor->value),
+                                        &req, NULL);
                 value_width = req.width + COLUMN_SPACING;
                 value_height = req.height + ROW_SPACING;
 
@@ -593,8 +596,8 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
                         return;
                 }
 
-                num_sensors_per_group = (sensors_applet->size / 
-                                         (horizontal ? value_height : 
+                num_sensors_per_group = (sensors_applet->size /
+                                         (horizontal ? value_height :
                                           value_width));
                 break;
 
@@ -602,13 +605,13 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
                 /* even though we end up packing the event boxes into the
                  * panel, these dont give back request sizes, so need to ask
                  * widgets directly */
-                gtk_widget_size_request(GTK_WIDGET(first_sensor->value),
-                                        &req);
+                gtk_widget_get_preferred_size(GTK_WIDGET(first_sensor->value),
+                                        &req, NULL);
                 value_width = req.width + COLUMN_SPACING;
                 value_height = req.height + ROW_SPACING;
 
-                gtk_widget_size_request(GTK_WIDGET(first_sensor->label),
-                                        &req);
+                gtk_widget_get_preferred_size(GTK_WIDGET(first_sensor->label),
+                                        &req, NULL);
                 label_width = req.width + COLUMN_SPACING;
                 label_height = req.height + ROW_SPACING;
         
@@ -639,13 +642,13 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
                 break;
 
         case DISPLAY_ICON_WITH_VALUE:
-                gtk_widget_size_request(GTK_WIDGET(first_sensor->value),
-                                        &req);
+                gtk_widget_get_preferred_size(GTK_WIDGET(first_sensor->value),
+                                        &req, NULL);
                 value_width = req.width + COLUMN_SPACING;
                 value_height = req.height + ROW_SPACING;
 
-                gtk_widget_size_request(GTK_WIDGET(first_sensor->icon),
-                                        &req);
+                gtk_widget_get_preferred_size(GTK_WIDGET(first_sensor->icon),
+                                        &req, NULL);
                 icon_width = req.width + COLUMN_SPACING;
                 icon_height = req.height + ROW_SPACING;
                 
@@ -659,12 +662,12 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
                 
                 switch (layout_mode) {
                 case VALUE_BESIDE_LABEL:
-                        num_sensors_per_group = (sensors_applet->size / 
+                        num_sensors_per_group = (sensors_applet->size /
                                                  (horizontal ? MAX(icon_height, value_height) : 
                                                   (icon_width + value_width)));
                         break;
                 case VALUE_BELOW_LABEL:
-                        num_sensors_per_group = (sensors_applet->size / 
+                        num_sensors_per_group = (sensors_applet->size /
                                                  (horizontal ? (icon_height + value_height) : 
                                                   MAX(icon_width, value_width)));
 
@@ -674,8 +677,8 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
                 break;
 
         case DISPLAY_ICON:
-                gtk_widget_size_request(GTK_WIDGET(first_sensor->icon),
-                                        &req);
+                gtk_widget_get_preferred_size(GTK_WIDGET(first_sensor->icon),
+                                        &req, NULL);
                 icon_width = req.width + COLUMN_SPACING;
                 icon_height = req.height + ROW_SPACING;
                 if (!(icon_width && icon_height)) {
@@ -743,9 +746,9 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
 
 	if (sensors_applet->table == NULL) {
 		/* create table and add to applet */
-		sensors_applet->table = gtk_table_new(rows, cols, FALSE);
-		gtk_table_set_col_spacings(GTK_TABLE(sensors_applet->table), COLUMN_SPACING);
-		gtk_table_set_row_spacings(GTK_TABLE(sensors_applet->table), ROW_SPACING);
+		sensors_applet->table = gtk_grid_new();
+		gtk_grid_set_column_spacing(GTK_GRID(sensors_applet->table), COLUMN_SPACING);
+		gtk_grid_set_row_spacing(GTK_GRID(sensors_applet->table), ROW_SPACING);
 		gtk_container_add(GTK_CONTAINER(sensors_applet->applet), sensors_applet->table);
 	} else {
 		/* remove all children if table already exists so we can start
@@ -756,9 +759,6 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
 		gtk_container_foreach(GTK_CONTAINER(sensors_applet->table),
 				      sensors_applet_pack_display_empty_table_cb,
 				      sensors_applet->table);
-
-		/* then resize table */
-		gtk_table_resize(GTK_TABLE(sensors_applet->table), rows, cols);
 	}
               
               /* pack icons / labels and values into table */
@@ -776,17 +776,29 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
 				/* attach label / icon at this point */
 				if (display_mode == DISPLAY_ICON_WITH_VALUE) {
 					if (((ActiveSensor *)(current_sensor->data))->icon) {
-						gtk_table_attach_defaults(GTK_TABLE(sensors_applet->table),
+						gtk_grid_attach(GTK_GRID(sensors_applet->table),
                                                                           ((ActiveSensor *)(current_sensor->data))->icon,
-									  i, i + 1,
-									  j, j + 1);
+									  i, j,
+									  1, 1);
+						g_object_set (G_OBJECT (sensors_applet->table),
+							"halign", GTK_ALIGN_FILL,
+							"valign", GTK_ALIGN_FILL,
+							"vexpand", TRUE,
+							"hexpand", TRUE,
+							NULL);
 					}
 				} else {
 					if (((ActiveSensor *)(current_sensor->data))->label) {
-						gtk_table_attach_defaults(GTK_TABLE(sensors_applet->table),
+						gtk_grid_attach(GTK_GRID(sensors_applet->table),
 									  ((ActiveSensor *)(current_sensor->data))->label,
-                                                                          i, i + 1,
-									  j, j + 1);
+                                                                          i, j,
+									  1, 1);
+						g_object_set (G_OBJECT (sensors_applet->table),
+							"halign", GTK_ALIGN_FILL,
+							"valign", GTK_ALIGN_FILL,
+							"vexpand", TRUE,
+							"hexpand", TRUE,
+							NULL);
 					}				
 				}
 				/* now attach sensor value to either
@@ -806,10 +818,17 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
 
 					 /* place value next to label */
 					if (((ActiveSensor *)(current_sensor->data))->value) {
-						gtk_table_attach_defaults(GTK_TABLE(sensors_applet->table),
+						gtk_grid_attach(GTK_GRID(sensors_applet->table),
 									  ((ActiveSensor *)(current_sensor->data))->value,
-									  i + 1, i + 2,
-									  j, j + 1);
+									  i + 1, j,
+									  1,
+									  1);
+						g_object_set (G_OBJECT (sensors_applet->table),
+							"halign", GTK_ALIGN_FILL,
+							"valign", GTK_ALIGN_FILL,
+							"vexpand", TRUE,
+							"hexpand", TRUE,
+							NULL);
 					}
 					j++;
 				} else { /* place value below label */
@@ -825,10 +844,16 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
 					}
  
 					if (((ActiveSensor *)(current_sensor->data))->value) {
-						gtk_table_attach_defaults(GTK_TABLE(sensors_applet->table),
+						gtk_grid_attach(GTK_GRID(sensors_applet->table),
 									  ((ActiveSensor *)(current_sensor->data))->value,
-									  i, i + 1,
-									  j + 1, j + 2);
+									  i, j + 1,
+									  1, 1);
+						g_object_set (G_OBJECT (sensors_applet->table),
+							"halign", GTK_ALIGN_FILL,
+							"valign", GTK_ALIGN_FILL,
+							"vexpand", TRUE,
+							"hexpand", TRUE,
+							NULL);
 					}
 					j += 2;
 				}
@@ -853,24 +878,42 @@ static void sensors_applet_pack_display(SensorsApplet *sensors_applet) {
                                 if (display_mode == DISPLAY_VALUE) {
                                         
                                         if (((ActiveSensor *)(current_sensor->data))->value) {
-                                                gtk_table_attach_defaults(GTK_TABLE(sensors_applet->table),
+                                                gtk_grid_attach(GTK_GRID(sensors_applet->table),
                                                                           ((ActiveSensor *)(current_sensor->data))->value,
-                                                                          i, i + 1,
-                                                                          j, j + 1);
+                                                                          i, j,
+									  1, 1);
+						g_object_set (G_OBJECT (sensors_applet->table),
+							"halign", GTK_ALIGN_FILL,
+							"valign", GTK_ALIGN_FILL,
+							"vexpand", TRUE,
+							"hexpand", TRUE,
+							NULL);
                                         }
                                 } else if (display_mode == DISPLAY_ICON) {
                                         if (((ActiveSensor *)(current_sensor->data))->value) {
-                                                gtk_table_attach_defaults(GTK_TABLE(sensors_applet->table),
+                                                gtk_grid_attach(GTK_GRID(sensors_applet->table),
                                                                           ((ActiveSensor *)(current_sensor->data))->icon,
-                                                                          i, i + 1,
-                                                                          j, j + 1);
+                                                                          i, j,
+									  1, 1);
+						g_object_set (G_OBJECT (sensors_applet->table),
+							"halign", GTK_ALIGN_FILL,
+							"valign", GTK_ALIGN_FILL,
+							"vexpand", TRUE,
+							"hexpand", TRUE,
+							NULL);
                                         }
                                 } else if (display_mode == DISPLAY_GRAPH) {
                                         if (((ActiveSensor *)(current_sensor->data))->graph) {
-                                                gtk_table_attach_defaults(GTK_TABLE(sensors_applet->table),
+                                                gtk_grid_attach(GTK_GRID(sensors_applet->table),
                                                                           ((ActiveSensor *)(current_sensor->data))->graph_frame,
-                                                                          i, i + 1,
-                                                                          j, j + 1);
+                                                                          i, j,
+									  1, 1);
+						g_object_set (G_OBJECT (sensors_applet->table),
+							"halign", GTK_ALIGN_FILL,
+							"valign", GTK_ALIGN_FILL,
+							"vexpand", TRUE,
+							"hexpand", TRUE,
+							NULL);
                                         }
                                 }
 

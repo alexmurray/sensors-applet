@@ -60,7 +60,7 @@ typedef struct {
 	GtkAlignment *alarm_timeout_spinbutton_aligner;
 	GtkAdjustment *alarm_timeout_adjust;
 	GtkSpinButton *alarm_timeout_spinbutton;
-	GtkTable *table;
+	GtkGrid *table;
 	GtkAlignment *alarm_enable_aligner;
 	GtkCheckButton *alarm_enable_checkbutton;
 	GtkEntry *low_alarm_command_entry, *high_alarm_command_entry;
@@ -318,19 +318,21 @@ static void sensor_config_dialog_icon_type_changed(GtkComboBox *icon_type_combo_
         }
 }
 
+
 static void sensor_config_dialog_graph_color_set(GtkColorButton *color_button,
                                                  SensorConfigDialog *config_dialog) {
 	GtkTreeModel *model;
 	GtkTreePath *path;
 	GtkTreeIter iter;
-	GdkColor color;
+	GdkRGBA color;
         gchar *color_string;
 
-        gtk_color_button_get_color(color_button,
+        gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(color_button),
                                    &color);
 
-        color_string = g_strdup_printf("#%02X%02X%02X", color.red / 256, 
-                                       color.green / 256, color.blue / 256);
+	color_string = g_strdup_printf ("#%02X%02X%02X", (int)(0.5 + CLAMP (color.red, 0., 1.) * 255.),
+					(int)(0.5 + CLAMP (color.green, 0., 1.) * 255.),
+					(int)(0.5 + CLAMP (color.blue, 0., 1.) * 255.));
 
         gtk_tree_selection_get_selected(config_dialog->sensors_applet->selection,
 					&model,
@@ -360,7 +362,7 @@ void sensor_config_dialog_create(SensorsApplet *sensors_applet) {
         IconType count;
         GdkPixbuf *pixbuf;
 
-        GdkColor graph_color;        
+        GdkRGBA graph_color;
         gchar *sensor_label;
         gchar *header_text;
         
@@ -428,10 +430,9 @@ void sensor_config_dialog_create(SensorsApplet *sensors_applet) {
         g_free(header_text);
 
 
-        gdk_color_parse(graph_color_string,
-                        &graph_color);
+        gdk_rgba_parse(&graph_color, graph_color_string);
         
-        config_dialog->graph_color_button = GTK_COLOR_BUTTON(gtk_color_button_new_with_color(&graph_color));
+        config_dialog->graph_color_button = GTK_COLOR_BUTTON(gtk_color_button_new_with_rgba(&graph_color));
 	config_dialog->graph_color_button_aligner = g_object_new(GTK_TYPE_ALIGNMENT,
                                                   "child", config_dialog->graph_color_button,
                                                    "xalign", 0.0,
@@ -527,7 +528,7 @@ void sensor_config_dialog_create(SensorsApplet *sensors_applet) {
 			      "page-size", 1.0,
 			      NULL);
 
-	
+
 	config_dialog->multiplier_spinbutton = g_object_new(GTK_TYPE_SPIN_BUTTON,
 					     "adjustment", config_dialog->multiplier_adjust,
 					     "digits", VALUE_DECIMAL_PLACES,
@@ -784,136 +785,276 @@ void sensor_config_dialog_create(SensorsApplet *sensors_applet) {
                                   GTK_WIDGET(config_dialog->graph_color_button));
         g_object_unref(config_dialog->size_group);
 
-	config_dialog->table = g_object_new(GTK_TYPE_TABLE,
+	config_dialog->table = g_object_new(GTK_TYPE_GRID,
 			     "column-spacing", 5,
-			     "homogeneous", FALSE,
-			     "n-columns", 3,
-			     "n-rows", 15,
                              "row-spacing", 6,
-                             "column-spacing", 12,
 			     NULL);
 
 
-        gtk_table_attach_defaults(config_dialog->table,
+        gtk_grid_attach(config_dialog->table,
                                   GTK_WIDGET(config_dialog->scale_header),
-                                  0, 2,
-                                  0, 1);
+                                  0, 0,
+				  2, 1);
+	g_object_set (G_OBJECT (config_dialog->scale_header),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->multiplier_label),
-				  1, 2,
-				  1, 2);
+				  1, 1,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->multiplier_label),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 	
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->multiplier_spinbutton_aligner),
-				  2, 3,
-				  1, 2);
+				  2, 1,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->multiplier_spinbutton_aligner),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 	
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->offset_label),
 				  1, 2,
-				  2, 3);
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->offset_label),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->offset_spinbutton_aligner),
-				  2, 3,
-				  2, 3);
+				  2, 2,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->offset_spinbutton_aligner),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 	
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->limits_header),
-				  0, 2,
-				  3, 4);
+				  0, 3,
+				  2, 1);
+	g_object_set (G_OBJECT (config_dialog->limits_header),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 
 	/* now pack alarm widgets */
-        gtk_table_attach_defaults(config_dialog->table,
+        gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->low_value_label),
-				  1, 2,
-				  4, 5);
+				  1, 4,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->low_value_label),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 	
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->low_value_spinbutton_aligner),
-				  2, 3,
-				  4, 5);
+				  2, 4,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->low_value_spinbutton_aligner),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->high_value_label),
-				  1, 2,
-				  5, 6);
+				  1, 5,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->high_value_label),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 	
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->high_value_spinbutton_aligner),
-				  2, 3,
-				  5, 6);
+				  2, 5,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->high_value_spinbutton_aligner),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 	
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->alarm_header),
-				  0, 2,
-				  6, 7);
+				  0, 6,
+				  2, 1);
+	g_object_set (G_OBJECT (config_dialog->alarm_header),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->alarm_enable_aligner),
-				  1, 2,
-				  7, 8);	
+				  1, 7,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->alarm_enable_aligner),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->alarm_timeout_label),
-				  1, 2,
-				  8, 9);
+				  1, 8,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->alarm_timeout_label),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->alarm_timeout_spinbutton_aligner),
-				  2, 3,
-				  8, 9);
+				  2, 8,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->alarm_timeout_spinbutton_aligner),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 	
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->low_alarm_command_label),
-				  1, 2,
-				  9, 10);
+				  1, 9,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->low_alarm_command_label),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->low_alarm_command_entry),
-				  2, 3,
-				  9, 10);
+				  2, 9,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->low_alarm_command_entry),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->high_alarm_command_label),
-				  1, 2,
-				  10, 11);
+				  1, 10,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->high_alarm_command_label),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->high_alarm_command_entry),
-				  2, 3,
-				  10, 11);
+				  2, 10,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->high_alarm_command_entry),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 
-        gtk_table_attach_defaults(config_dialog->table,
+        gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->icon_header),
-				  0, 2,
-				  11, 12);
+				  0, 11,
+				  2, 1);
+	g_object_set (G_OBJECT (config_dialog->icon_header),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->icon_type_label),
-				  1, 2,
-				  12, 13);
+				  1, 12,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->icon_type_label),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 	
-        gtk_table_attach_defaults(config_dialog->table,
+        gtk_grid_attach(config_dialog->table,
                                   GTK_WIDGET(config_dialog->icon_type_combo_box_aligner),
-                                  2, 3,
-                                  12, 13);
+                                  2, 12,
+                                  1, 1);
+	g_object_set (G_OBJECT (config_dialog->icon_type_combo_box_aligner),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
         
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->graph_header),
-				  0, 2,
-				  13, 14);
+				  0, 13,
+				  2, 1);
+	g_object_set (G_OBJECT (config_dialog->graph_header),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->graph_color_label),
-				  1, 2,
-				  14, 15);
+				  1, 14,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->graph_color_label),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 
-	gtk_table_attach_defaults(config_dialog->table,
+	gtk_grid_attach(config_dialog->table,
 				  GTK_WIDGET(config_dialog->graph_color_button_aligner),
-				  2, 3,
-				  14, 15);
+				  2, 14,
+				  1, 1);
+	g_object_set (G_OBJECT (config_dialog->graph_color_button_aligner),
+                       "halign", GTK_ALIGN_FILL,
+                       "valign", GTK_ALIGN_FILL,
+		       "vexpand", TRUE,
+		       "hexpand", TRUE,
+                       NULL);
 
 	content_area = gtk_dialog_get_content_area (GTK_DIALOG(config_dialog->dialog));
 	gtk_box_pack_start(GTK_BOX(content_area), GTK_WIDGET(config_dialog->table),
